@@ -15,6 +15,13 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
+    void on_actionTCP_triggered();
+    void on_actionUDP_triggered();
+
+    void on_actionClient_triggered();
+    void on_actionServer_triggered();
+
 private:
     Ui::MainWindow *ui;
 };
