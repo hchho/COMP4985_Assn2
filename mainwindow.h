@@ -16,7 +16,6 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    ConnectivityManager connectivityManager;
 
 private slots:
     void on_actionTCP_triggered();
@@ -24,6 +23,9 @@ private slots:
 
     void on_actionClient_triggered();
     void on_actionServer_triggered();
+
+    ConnectionType connectionType;
+    ProtocolType protocolType;
 
 private:
     Ui::MainWindow *ui;

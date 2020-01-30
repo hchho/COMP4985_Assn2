@@ -3,14 +3,16 @@
 
 #include <ConnectionType.h>
 #include <Connection.h>
+#include <ProtocolType.h>
 
 class ConnectivityManager {
 private:
-    ConnectionType connectionType;
     static ConnectivityManager *s_instance;
     ConnectivityManager() = default;
-    void initializeClientConnection();
-    void initializeServerConnection();
+    void initializeClientConnection(ProtocolType, int port);
+    Connection* initializeServerConnection(ProtocolType, int port);
+
+    void openConnection();
 public:
     static ConnectivityManager *instance() {
         if (!s_instance) {
@@ -18,8 +20,8 @@ public:
         }
         return s_instance;
     }
-    void setConnectionType(ConnectionType);
-    Connection* initializeConnection();
+    Connection* initializeConnection(ConnectionType, ProtocolType, int port);
+    void closeConnection();
 };
 
 #endif // CONNECTIVITYMANAGER_H

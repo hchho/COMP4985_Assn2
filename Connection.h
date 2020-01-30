@@ -4,19 +4,23 @@
 class Connection {
 public:
     virtual ~Connection() {}
-    virtual bool send() = 0;
-    virtual bool recv() = 0;
+    virtual int start() = 0;
+    virtual void stop() = 0;
 };
 
 class TCPConnection : public Connection {
 public:
-    bool send() override;
-    bool recv() override;
+    int start() override {
+        return 0;
+    }
+    void stop() override {}
 };
 
 class UDPConnection : public Connection {
-    bool send() override;
-    bool recv() override;
+    int start() override {
+        return 0;
+    }
+    void stop() override {}
 };
 
 #endif // CONNECTION_H
