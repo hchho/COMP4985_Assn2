@@ -1,26 +1,65 @@
 #ifndef CONNECTION_H
 #define CONNECTION_H
 
+#include <WinSock2.h>
+#include <stdio.h>
+#include <string>
+
+#define MAXLEN 60000
+
+using namespace std;
+
 class Connection {
+protected:
+    SOCKET *sd;
+    struct sockaddr_in client;
+    int client_len;
+    char *buf;
 public:
-    virtual ~Connection() {}
-    virtual int start() = 0;
-    virtual void stop() = 0;
+    Connection() = default;
+    Connection(SOCKET *s) : sd(s) {
+        client_len = sizeof(client);
+        buf = new char[MAXLEN];
+    }
+    virtual ~Connection() {
+        delete sd;
+        delete[] buf;
+    }
+    virtual bool send(string data) = 0;
+    virtual string receive() = 0;
+    virtual void stop() {
+        WSACleanup();
+    }
 };
 
 class TCPConnection : public Connection {
 public:
-    int start() override {
+    TCPConnection() : Connection() {}
+    TCPConnection(SOCKET *s) : Connection(s) {}
+    bool send(string data) override {
         return 0;
     }
-    void stop() override {}
+    string receive() override {
+        return "";
+    }
 };
 
 class UDPConnection : public Connection {
-    int start() override {
-        return 0;
+public:
+    UDPConnection(): Connection() {}
+    UDPConnection(SOCKET *s) : Connection(s) {}
+    bool send(string data) override {
+        return sizeof(data) == sendto(*sd, data.c_str(), sizeof(data), 0, (struct sockaddr *) &client, client_len);
     }
-    void stop() override {}
+    string receive() override {
+        int n;
+        if ((n = recvfrom(*sd, buf, MAXLEN, 0, (struct sockaddr*)&client, &client_len)) < 0) {
+            printf("Received wrong output");
+            exit(1);
+        }
+        string output(buf);
+        return output;
+    }
 };
 
 #endif // CONNECTION_H

@@ -8,7 +8,6 @@ Connection* ConnectivityManager::initializeConnection(ConnectionType connectionT
         break;
     case ConnectionType::SERVER:
         return initializeServerConnection(protocolType, port);
-        break;
     }
 }
 
@@ -18,7 +17,7 @@ void ConnectivityManager::initializeClientConnection(ProtocolType protocol, int 
 
 Connection* ConnectivityManager::initializeServerConnection(ProtocolType protocol, int port) {
     SOCKET sd;
-    struct	sockaddr_in server, client;
+    struct	sockaddr_in server;
 
     openConnection();
 
@@ -51,9 +50,9 @@ Connection* ConnectivityManager::initializeServerConnection(ProtocolType protoco
 
     switch(protocol) {
     case ProtocolType::TCP:
-        return new TCPConnection;
+        return new TCPConnection(&sd);
     case ProtocolType::UDP:
-        return new UDPConnection;
+        return new UDPConnection(&sd);
     }
 }
 
@@ -61,4 +60,8 @@ void ConnectivityManager::openConnection() {
     WSADATA stWSAData;
     WORD wVersionRequested = MAKEWORD (2,2);
     WSAStartup(wVersionRequested, &stWSAData );
+}
+
+void ConnectivityManager::closeConnection(Connection* connection) {
+    connection->stop();
 }

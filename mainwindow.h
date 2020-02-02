@@ -24,10 +24,9 @@ private slots:
     void on_actionClient_triggered();
     void on_actionServer_triggered();
 
-    ConnectionType connectionType;
-    ProtocolType protocolType;
-
 private:
     Ui::MainWindow *ui;
+    ConnectionType connectionType;
+    ProtocolType protocolType;
 };
 #endif // MAINWINDOW_H

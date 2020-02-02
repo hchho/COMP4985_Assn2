@@ -21,7 +21,7 @@ public:
         return s_instance;
     }
     Connection* initializeConnection(ConnectionType, ProtocolType, int port);
-    void closeConnection();
+    void closeConnection(Connection*);
 };
 
 #endif // CONNECTIVITYMANAGER_H
