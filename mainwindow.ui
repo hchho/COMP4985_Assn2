@@ -69,14 +69,14 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
-        <widget class="QLabel" name="label">
+        <widget class="QLabel" name="packetSizeLabel">
          <property name="text">
           <string>Packet Size (bytes)</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QComboBox" name="comboBox">
+        <widget class="QComboBox" name="packetSizeOptions">
          <item>
           <property name="text">
            <string>1024</string>
@@ -100,14 +100,14 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="label_5">
+        <widget class="QLabel" name="numberOfTimesLabel">
          <property name="text">
           <string>Number of times</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QComboBox" name="comboBox_2">
+        <widget class="QComboBox" name="numberOfTimesOptions">
          <item>
           <property name="text">
            <string>1</string>
@@ -126,7 +126,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton">
+        <widget class="QPushButton" name="sendPacketBtn">
          <property name="text">
           <string>Send Packet</string>
          </property>
@@ -137,28 +137,28 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_3">
        <item>
-        <widget class="QLabel" name="label_2">
+        <widget class="QLabel" name="packetsSentLabel">
          <property name="text">
           <string>Packets Sent:</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="label_3">
+        <widget class="QLabel" name="packetsSentOutput">
          <property name="text">
           <string>0</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="label_4">
+        <widget class="QLabel" name="bytesSentLabel">
          <property name="text">
           <string>Bytes Sent</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="label_6">
+        <widget class="QLabel" name="bytesSentOutput">
          <property name="text">
           <string>0</string>
          </property>
@@ -169,28 +169,28 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
-        <widget class="QLabel" name="label_8">
+        <widget class="QLabel" name="packetsReceivedLabel">
          <property name="text">
           <string>Packets Received:</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="label_7">
+        <widget class="QLabel" name="packetsReceivedOutput">
          <property name="text">
           <string>0</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="label_9">
+        <widget class="QLabel" name="bytesReceivedLabel">
          <property name="text">
           <string>Bytes Received:</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="label_10">
+        <widget class="QLabel" name="bytesReceivedOutput">
          <property name="text">
           <string>0</string>
          </property>
@@ -201,14 +201,14 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_4">
        <item>
-        <widget class="QLabel" name="label_11">
+        <widget class="QLabel" name="timeElapsedLabel">
          <property name="text">
           <string>Time Elapsed (milliseconds):</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="label_12">
+        <widget class="QLabel" name="timeElapsedOutput">
          <property name="text">
           <string>0</string>
          </property>
