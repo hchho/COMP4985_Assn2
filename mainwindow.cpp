@@ -7,6 +7,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    ui->receiveBtn->hide();
 }
 
 MainWindow::~MainWindow()
@@ -68,9 +69,14 @@ void MainWindow::on_connectBtn_clicked()
             return;
         }
         QString rawIp = ui->ipAddressInput->text();
-        const char *ipAddress = rawIp.toLocal8Bit().data();
+        string stringIp = rawIp.toStdString();
+        const char *ipAddress = stringIp.c_str();
         currConnection = ConnectivityManager::instance()->initializeConnection(connectionType, protocolType, port, ipAddress);
+
+        ui->receiveBtn->setHidden(connectionType != ConnectionType::SERVER);
     } else {
         ui->connectBtn->setText("Connect");
+        ui->receiveBtn->hide();
+        ConnectivityManager::instance()->closeConnection(currConnection);
     }
 }
