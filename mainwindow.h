@@ -24,9 +24,13 @@ private slots:
     void on_actionClient_triggered();
     void on_actionServer_triggered();
 
+    void on_connectBtn_clicked();
+
 private:
     Ui::MainWindow *ui;
     ConnectionType connectionType;
     ProtocolType protocolType;
+    Connection* currConnection;
+    bool isConnected = false;
 };
 #endif // MAINWINDOW_H

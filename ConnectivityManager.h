@@ -14,12 +14,7 @@ private:
 
     void openConnection();
 public:
-    static ConnectivityManager *instance() {
-        if (!s_instance) {
-            s_instance = new ConnectivityManager;
-        }
-        return s_instance;
-    }
+    static ConnectivityManager *instance();
     Connection* initializeConnection(ConnectionType, ProtocolType, int port, const char* host);
     void closeConnection(Connection*);
 };

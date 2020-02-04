@@ -22,7 +22,7 @@ public:
         delete[] buf;
     }
     virtual Connection* initClientConnection() = 0;
-    virtual bool send(string data) = 0;
+    virtual int send(string data) = 0;
     virtual string receive() = 0;
     virtual void stop() {
         WSACleanup();
@@ -33,7 +33,7 @@ class TCPConnection : public Connection {
 public:
     TCPConnection() : Connection() {}
     TCPConnection(SOCKET s) : Connection(s) {}
-    bool send(string data) override {
+    int send(string data) override {
         return 0;
     }
     string receive() override {
@@ -52,12 +52,11 @@ private:
 public:
     UDPConnection(): Connection() {}
     UDPConnection(SOCKET s, struct	sockaddr *ss) : Connection(s), server(ss) {
-
         client_len = sizeof(*client);
         server_len = sizeof(*server);
     }
-    bool send(string data) override {
-        return sizeof(data) == sendto(sd, data.c_str(), sizeof(data), 0, server, server_len);
+    int send(string data) override {
+        return sendto(sd, data.c_str(), sizeof(data), 0, server, server_len);
     }
     string receive() override {
         int n;

@@ -4,6 +4,15 @@
 #include <stdio.h>
 #include <Winsock2.h>
 
+ConnectivityManager * ConnectivityManager::s_instance = 0;
+
+ConnectivityManager* ConnectivityManager::instance() {
+    if (!s_instance) {
+        s_instance = new ConnectivityManager;
+    }
+    return s_instance;
+}
+
 Connection* ConnectivityManager::initializeConnection(ConnectionType connectionType, ProtocolType protocol, int port, const char* host) {
     SOCKET sd;
     struct	sockaddr_in server;
