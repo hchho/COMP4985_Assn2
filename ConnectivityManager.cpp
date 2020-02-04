@@ -2,22 +2,8 @@
 #include <stdio.h>
 #include <Winsock2.h>
 
-Connection* ConnectivityManager::initializeConnection(ConnectionType connectionType, ProtocolType protocolType, int port) {
-    switch(connectionType) {
-    case ConnectionType::CLIENT:
-        break;
-    case ConnectionType::SERVER:
-        return initializeServerConnection(protocolType, port);
-    }
-}
-
-void ConnectivityManager::initializeClientConnection(ProtocolType protocol, int port) {
-
-}
-
-Connection* ConnectivityManager::initializeServerConnection(ProtocolType protocol, int port) {
+Connection* ConnectivityManager::initializeConnection(ConnectionType connectionType, ProtocolType protocol, int port) {
     SOCKET sd;
-    struct	sockaddr_in server;
 
     openConnection();
 
@@ -29,6 +15,35 @@ Connection* ConnectivityManager::initializeServerConnection(ProtocolType protoco
         sd = socket (PF_INET, SOCK_DGRAM, 0);
         break;
     }
+
+    switch(connectionType) {
+    case ConnectionType::CLIENT:
+        initializeClientConnection(protocol, sd, port);
+        break;
+    case ConnectionType::SERVER:
+        return initializeServerConnection(protocol, sd, port);
+    }
+}
+
+void ConnectivityManager::initializeClientConnection(ProtocolType protocol, SOCKET sd, int port, const char* host) {
+    struct hostent	*hp;
+    struct sockaddr_in server;
+
+    memset((char *)&server, 0, sizeof(struct sockaddr_in));
+    server.sin_family = AF_INET;
+    server.sin_port = htons(port);
+    if ((hp = gethostbyname(host)) == NULL)
+    {
+        fprintf(stderr, "Unknown server address\n");
+        exit(1);
+    }
+
+    memcpy((char *)&server.sin_addr, hp->h_addr, hp->h_length);
+
+}
+
+Connection* ConnectivityManager::initializeServerConnection(ProtocolType protocol, SOCKET sd, int port) {
+    struct	sockaddr_in server;
 
     // Create a datagram socket
     if (sd == -1)
@@ -50,9 +65,9 @@ Connection* ConnectivityManager::initializeServerConnection(ProtocolType protoco
 
     switch(protocol) {
     case ProtocolType::TCP:
-        return new TCPConnection(&sd);
+        return new TCPConnection(sd);
     case ProtocolType::UDP:
-        return new UDPConnection(&sd);
+        return new UDPConnection(sd);
     }
 }
 

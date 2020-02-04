@@ -9,8 +9,8 @@ class ConnectivityManager {
 private:
     static ConnectivityManager *s_instance;
     ConnectivityManager() = default;
-    void initializeClientConnection(ProtocolType, int port);
-    Connection* initializeServerConnection(ProtocolType, int port);
+    void initializeClientConnection(ProtocolType, SOCKET, int port, const char* host);
+    Connection* initializeServerConnection(ProtocolType, SOCKET, int port);
 
     void openConnection();
 public:

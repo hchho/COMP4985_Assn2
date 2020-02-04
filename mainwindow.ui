@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>425</height>
+    <height>445</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -60,9 +60,9 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="sendFileBtn">
+      <widget class="QPushButton" name="receiveBtn">
        <property name="text">
-        <string>Send File</string>
+        <string>Begin Receiving</string>
        </property>
       </widget>
      </item>
@@ -129,6 +129,13 @@
         <widget class="QPushButton" name="sendPacketBtn">
          <property name="text">
           <string>Send Packet</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="sendFileBtn">
+         <property name="text">
+          <string>Send File</string>
          </property>
         </widget>
        </item>
@@ -225,7 +232,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>22</height>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuConnect">
