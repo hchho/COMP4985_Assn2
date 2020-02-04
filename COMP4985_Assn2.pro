@@ -24,6 +24,7 @@ HEADERS += \
     Connection.h \
     ConnectionType.h \
     ConnectivityManager.h \
+    ErrorHandler.h \
     ProtocolType.h \
     mainwindow.h
 

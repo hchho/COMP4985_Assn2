@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string>
 #include <WinSock2.h>
+#include "ErrorHandler.h"
 
 #define MAXLEN 60000
 
@@ -61,7 +62,7 @@ public:
     string receive() override {
         int n;
         if ((n = recvfrom(sd, buf, MAXLEN, 0, (struct sockaddr*)client, &client_len)) < 0) {
-            printf("Received wrong output");
+            ErrorHandler::showMessage("Received wrong output. Exiting...");
             exit(1);
         }
         string output(buf);
@@ -77,7 +78,7 @@ public:
 
         if (getsockname (sd, (struct sockaddr *)client, &client_len) < 0)
         {
-            perror ("getsockname: \n");
+            ErrorHandler::showMessage("Error getting socket name");
             exit(1);
         }
         return nullptr;

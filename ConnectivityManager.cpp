@@ -3,6 +3,7 @@
 #include <ConnectivityManager.h>
 #include <stdio.h>
 #include <Winsock2.h>
+#include <ErrorHandler.h>
 
 ConnectivityManager * ConnectivityManager::s_instance = 0;
 
@@ -31,7 +32,7 @@ Connection* ConnectivityManager::initializeConnection(ConnectionType connectionT
     // Create a datagram socket
     if (sd == -1)
     {
-        perror ("Can't create a socket");
+        ErrorHandler::showMessage("Can't create a socket. Exiting...");
         exit(1);
     }
 
@@ -56,7 +57,7 @@ Connection* ConnectivityManager::initializeClientConnection(ProtocolType protoco
 
     if ((hp = gethostbyname(host)) == NULL)
     {
-        fprintf(stderr, "Unknown server address\n");
+        ErrorHandler::showMessage("Unknown server address. Exiting...");
         exit(1);
     }
 
@@ -73,11 +74,12 @@ Connection* ConnectivityManager::initializeClientConnection(ProtocolType protoco
 
 Connection* ConnectivityManager::initializeServerConnection(ProtocolType protocol, SOCKET sd, struct	sockaddr_in *server) {
 
-    if (bind (sd, (struct sockaddr *)&server, sizeof(server)) == -1)
-    {
-        perror ("Can't bind name to socket");
-        exit(1);
-    }
+    bind (sd, (struct sockaddr *)&server, sizeof(server));
+//    if (bind (sd, (struct sockaddr *)&server, sizeof(server)) == -1)
+//    {
+//        ErrorHandler::showMessage("Can't bind name to socket. Exiting...");
+//        exit(1);
+//    }
 
     switch(protocol) {
     case ProtocolType::TCP:

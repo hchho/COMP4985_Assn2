@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <QMessageBox>
+#include "ErrorHandler.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -49,17 +49,13 @@ void MainWindow::on_connectBtn_clicked()
           ui->actionClient->isChecked()) ||
             !(ui->actionTCP->isChecked() ||
               ui->actionUDP->isChecked())) {
-        QMessageBox messageBox;
-        messageBox.critical(0,"Error","Please choose connection type and action!");
-        messageBox.setFixedSize(500,200);
+        ErrorHandler::showMessage("Please choose connection type and action!");
         return;
     }
 
     QString rawPort = ui->portInput->text();
     if (rawPort.isEmpty()) {
-        QMessageBox messageBox;
-        messageBox.critical(0,"Error","Please enter the port number");
-        messageBox.setFixedSize(500,200);
+        ErrorHandler::showMessage("Please enter port number");
         return;
     }
 
@@ -68,9 +64,7 @@ void MainWindow::on_connectBtn_clicked()
     if (isConnected) {
         ui->connectBtn->setText("Stop connection");
         if (connectionType == ConnectionType::CLIENT && ui->ipAddressInput->text().isEmpty()) {
-            QMessageBox messageBox;
-            messageBox.critical(0,"Error","Please enter the IP address");
-            messageBox.setFixedSize(500,200);
+            ErrorHandler::showMessage("Please input IP address");
             return;
         }
         QString rawIp = ui->ipAddressInput->text();
