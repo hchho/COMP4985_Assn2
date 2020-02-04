@@ -1,9 +1,9 @@
 #ifndef CONNECTION_H
 #define CONNECTION_H
 
-#include <WinSock2.h>
 #include <stdio.h>
 #include <string>
+#include <WinSock2.h>
 
 #define MAXLEN 60000
 
@@ -12,13 +12,10 @@ using namespace std;
 class Connection {
 protected:
     SOCKET sd;
-    struct sockaddr_in client;
-    int client_len;
     char *buf;
 public:
     Connection() = default;
     Connection(SOCKET s) : sd(s) {
-        client_len = sizeof(client);
         buf = new char[MAXLEN];
     }
     virtual ~Connection() {
@@ -42,18 +39,29 @@ public:
     string receive() override {
         return "";
     }
+    Connection * initClientConnection() override {
+        return nullptr;
+    }
 };
 
 class UDPConnection : public Connection {
+private:
+    int client_len, server_len;
+    struct	sockaddr *server;
+    struct sockaddr_in *client;
 public:
     UDPConnection(): Connection() {}
-    UDPConnection(SOCKET s) : Connection(s) {}
+    UDPConnection(SOCKET s, struct	sockaddr *ss) : Connection(s), server(ss) {
+
+        client_len = sizeof(*client);
+        server_len = sizeof(*server);
+    }
     bool send(string data) override {
-        return sizeof(data) == sendto(sd, data.c_str(), sizeof(data), 0, (struct sockaddr *) &client, client_len);
+        return sizeof(data) == sendto(sd, data.c_str(), sizeof(data), 0, server, server_len);
     }
     string receive() override {
         int n;
-        if ((n = recvfrom(sd, buf, MAXLEN, 0, (struct sockaddr*)&client, &client_len)) < 0) {
+        if ((n = recvfrom(sd, buf, MAXLEN, 0, (struct sockaddr*)client, &client_len)) < 0) {
             printf("Received wrong output");
             exit(1);
         }
@@ -61,7 +69,19 @@ public:
         return output;
     }
     Connection * initClientConnection() override {
+        memset((char *)client, 0, sizeof(*client));
+        client->sin_family = AF_INET;
+        client->sin_port = htons(0);  // bind to any available port
+        client->sin_addr.s_addr = htonl(INADDR_ANY);
 
+        bind(sd, (struct sockaddr *)client, client_len);
+
+        if (getsockname (sd, (struct sockaddr *)client, &client_len) < 0)
+        {
+            perror ("getsockname: \n");
+            exit(1);
+        }
+        return nullptr;
     }
 };
 

@@ -9,8 +9,8 @@ class ConnectivityManager {
 private:
     static ConnectivityManager *s_instance;
     ConnectivityManager() = default;
-    void initializeClientConnection(ProtocolType, SOCKET, int port, const char* host);
-    Connection* initializeServerConnection(ProtocolType, SOCKET, int port);
+    Connection* initializeClientConnection(ProtocolType, SOCKET, struct	sockaddr_in *server, const char* host);
+    Connection* initializeServerConnection(ProtocolType, SOCKET, struct	sockaddr_in *server);
 
     void openConnection();
 public:
@@ -20,7 +20,7 @@ public:
         }
         return s_instance;
     }
-    Connection* initializeConnection(ConnectionType, ProtocolType, int port);
+    Connection* initializeConnection(ConnectionType, ProtocolType, int port, const char* host);
     void closeConnection(Connection*);
 };
 

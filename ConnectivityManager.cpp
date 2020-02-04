@@ -1,9 +1,12 @@
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+
 #include <ConnectivityManager.h>
 #include <stdio.h>
 #include <Winsock2.h>
 
-Connection* ConnectivityManager::initializeConnection(ConnectionType connectionType, ProtocolType protocol, int port) {
+Connection* ConnectivityManager::initializeConnection(ConnectionType connectionType, ProtocolType protocol, int port, const char* host) {
     SOCKET sd;
+    struct	sockaddr_in server;
 
     openConnection();
 
@@ -15,35 +18,6 @@ Connection* ConnectivityManager::initializeConnection(ConnectionType connectionT
         sd = socket (PF_INET, SOCK_DGRAM, 0);
         break;
     }
-
-    switch(connectionType) {
-    case ConnectionType::CLIENT:
-        initializeClientConnection(protocol, sd, port);
-        break;
-    case ConnectionType::SERVER:
-        return initializeServerConnection(protocol, sd, port);
-    }
-}
-
-void ConnectivityManager::initializeClientConnection(ProtocolType protocol, SOCKET sd, int port, const char* host) {
-    struct hostent	*hp;
-    struct sockaddr_in server;
-
-    memset((char *)&server, 0, sizeof(struct sockaddr_in));
-    server.sin_family = AF_INET;
-    server.sin_port = htons(port);
-    if ((hp = gethostbyname(host)) == NULL)
-    {
-        fprintf(stderr, "Unknown server address\n");
-        exit(1);
-    }
-
-    memcpy((char *)&server.sin_addr, hp->h_addr, hp->h_length);
-
-}
-
-Connection* ConnectivityManager::initializeServerConnection(ProtocolType protocol, SOCKET sd, int port) {
-    struct	sockaddr_in server;
 
     // Create a datagram socket
     if (sd == -1)
@@ -57,6 +31,39 @@ Connection* ConnectivityManager::initializeServerConnection(ProtocolType protoco
     server.sin_port = htons(port);
     server.sin_addr.s_addr = htonl(INADDR_ANY); // Accept connections from any client
 
+    switch(connectionType) {
+    case ConnectionType::CLIENT:
+        return initializeClientConnection(protocol, sd, &server, host);
+    case ConnectionType::SERVER:
+        return initializeServerConnection(protocol, sd, &server);
+    default:
+        return nullptr;
+    }
+}
+
+Connection* ConnectivityManager::initializeClientConnection(ProtocolType protocol, SOCKET sd, struct	sockaddr_in *server, const char* host) {
+    Connection* connection;
+    struct hostent	*hp;
+
+    if ((hp = gethostbyname(host)) == NULL)
+    {
+        fprintf(stderr, "Unknown server address\n");
+        exit(1);
+    }
+
+    memcpy((char *)&server->sin_addr, hp->h_addr, hp->h_length);
+    switch(protocol) {
+    case ProtocolType::TCP:
+        connection = new TCPConnection(sd);
+    case ProtocolType::UDP:
+        connection = new UDPConnection(sd, (struct sockaddr*)&server);
+    }
+    connection->initClientConnection();
+    return connection;
+}
+
+Connection* ConnectivityManager::initializeServerConnection(ProtocolType protocol, SOCKET sd, struct	sockaddr_in *server) {
+
     if (bind (sd, (struct sockaddr *)&server, sizeof(server)) == -1)
     {
         perror ("Can't bind name to socket");
@@ -67,7 +74,7 @@ Connection* ConnectivityManager::initializeServerConnection(ProtocolType protoco
     case ProtocolType::TCP:
         return new TCPConnection(sd);
     case ProtocolType::UDP:
-        return new UDPConnection(sd);
+        return new UDPConnection(sd, (struct sockaddr*)&server);
     }
 }
 
