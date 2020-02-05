@@ -36,7 +36,7 @@ Connection* ConnectivityManager::initializeConnection(ConnectionType connectionT
         exit(1);
     }
 
-    memset((char *)&server, 0, sizeof(struct sockaddr_in));
+    memset(&server, 0, sizeof(struct sockaddr_in));
     server.sin_family = AF_INET;
     server.sin_port = htons(port);
 
@@ -67,7 +67,7 @@ Connection* ConnectivityManager::initializeClientConnection(ProtocolType protoco
     case ProtocolType::UDP:
         connection = new UDPConnection(sd, server);
     }
-    connection->initClientConnection();
+    //connection->initClientConnection();
     return connection;
 }
 

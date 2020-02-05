@@ -57,7 +57,8 @@ public:
         server_len = sizeof(*server);
     }
     int send(std::string data) override {
-        return sendto(sd, data.c_str(), sizeof(data), 0, (struct sockaddr*)server, server_len);
+        const char *output = data.c_str();
+        return sendto(sd, output, sizeof(output), 0, (struct sockaddr*)server, server_len);
     }
     std::string receive() override {
         int n;
@@ -70,20 +71,19 @@ public:
         return output;
     }
     Connection * initClientConnection() override {
-        client->sin_family = AF_INET;
-        client->sin_port = htons(0);  // bind to any available port
-        client->sin_addr.s_addr = htonl(INADDR_ANY);
+//        client->sin_family = AF_INET;
+//        client->sin_port = htons(0);  // bind to any available port
+//        client->sin_addr.s_addr = htonl(INADDR_ANY);
 
-        if(bind(sd, (struct sockaddr *)client, client_len) == SOCKET_ERROR) {
-            ErrorHandler::showMessage("Error binding socket");
-            exit(1);
-        };
+//        if(bind(sd, (struct sockaddr *)client, client_len) == SOCKET_ERROR) {
+//            ErrorHandler::showMessage("Error binding socket");
+//            exit(1);
+//        };
 
-        if(getsockname (sd, (struct sockaddr *)client, &client_len) < 0) {
-            int err = WSAGetLastError();
-            ErrorHandler::showMessage("Error getting socket name");
-            exit(1);
-        };
+//        if(getsockname (sd, (struct sockaddr *)client, &client_len) < 0) {
+//            ErrorHandler::showMessage("Error getting socket name");
+//            exit(1);
+//        };
 
         return this;
     }
