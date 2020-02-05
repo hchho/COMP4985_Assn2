@@ -75,11 +75,6 @@ Connection* ConnectivityManager::initializeClientConnection(ProtocolType protoco
 Connection* ConnectivityManager::initializeServerConnection(ProtocolType protocol, SOCKET sd, struct	sockaddr_in *server) {
 
     bind (sd, (struct sockaddr *)&server, sizeof(server));
-//    if (bind (sd, (struct sockaddr *)&server, sizeof(server)) == -1)
-//    {
-//        ErrorHandler::showMessage("Can't bind name to socket. Exiting...");
-//        exit(1);
-//    }
 
     switch(protocol) {
     case ProtocolType::TCP:
