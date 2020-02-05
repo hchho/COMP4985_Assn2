@@ -1,8 +1,6 @@
 #ifndef CONNECTION_H
 #define CONNECTION_H
 
-#define _CRT_SECURE_NO_WARNINGS
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include <errno.h>
 #include <stdio.h>
 #include <string>
@@ -51,20 +49,22 @@ public:
 class UDPConnection : public Connection {
 private:
     int client_len, server_len;
-    struct	sockaddr *server;
-    struct sockaddr_in *client;
+    struct sockaddr_in *client, *server;
 public:
     UDPConnection(): Connection() {}
-    UDPConnection(SOCKET s, struct	sockaddr *ss) : Connection(s), server(ss) {
+    UDPConnection(SOCKET s, struct	sockaddr_in *ss) : Connection(s), server(ss) {
         client = (struct sockaddr_in*)malloc(sizeof(*client));
+
+        client_len = sizeof(*client);
         server_len = sizeof(*server);
     }
     int send(string data) override {
-        return sendto(sd, data.c_str(), sizeof(data), 0, server, server_len);
+        return sendto(sd, data.c_str(), sizeof(data), 0, (struct sockaddr*)server, server_len);
     }
     string receive() override {
         int n;
         if ((n = recvfrom(sd, buf, MAXLEN, 0, (struct sockaddr*)client, &client_len)) < 0) {
+            int err = WSAGetLastError();
             ErrorHandler::showMessage("Received wrong output. Exiting...");
             exit(1);
         }
@@ -72,15 +72,20 @@ public:
         return output;
     }
     Connection * initClientConnection() override {
-        client_len = sizeof(*client);
-
         client->sin_family = AF_INET;
         client->sin_port = htons(0);  // bind to any available port
         client->sin_addr.s_addr = htonl(INADDR_ANY);
 
-        bind(sd, (struct sockaddr *)client, client_len);
+        if(::bind(sd, (struct sockaddr *)client, client_len) == SOCKET_ERROR) {
+            ErrorHandler::showMessage("Error binding socket");
+            exit(1);
+        };
 
-        getsockname (sd, (struct sockaddr *)client, &client_len);
+        if(getsockname (sd, (struct sockaddr *)client, &client_len) < 0) {
+            int err = WSAGetLastError();
+            ErrorHandler::showMessage("Error getting socket name");
+            exit(1);
+        };
 
         return this;
     }

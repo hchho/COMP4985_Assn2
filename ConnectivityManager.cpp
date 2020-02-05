@@ -39,7 +39,6 @@ Connection* ConnectivityManager::initializeConnection(ConnectionType connectionT
     memset((char *)&server, 0, sizeof(struct sockaddr_in));
     server.sin_family = AF_INET;
     server.sin_port = htons(port);
-    server.sin_addr.s_addr = htonl(INADDR_ANY); // Accept connections from any client
 
     switch(connectionType) {
     case ConnectionType::CLIENT:
@@ -66,21 +65,25 @@ Connection* ConnectivityManager::initializeClientConnection(ProtocolType protoco
     case ProtocolType::TCP:
         connection = new TCPConnection(sd);
     case ProtocolType::UDP:
-        connection = new UDPConnection(sd, (struct sockaddr*)&server);
+        connection = new UDPConnection(sd, server);
     }
     connection->initClientConnection();
     return connection;
 }
 
 Connection* ConnectivityManager::initializeServerConnection(ProtocolType protocol, SOCKET sd, struct	sockaddr_in *server) {
+    server->sin_addr.s_addr = htonl(INADDR_ANY); // Accept connections from any client
 
-    bind (sd, (struct sockaddr *)&server, sizeof(server));
+    if(::bind (sd, (struct sockaddr *)server, sizeof(*server)) == SOCKET_ERROR) {
+        ErrorHandler::showMessage("Error binding socket");
+        exit(1);
+    }
 
     switch(protocol) {
     case ProtocolType::TCP:
         return new TCPConnection(sd);
     case ProtocolType::UDP:
-        return new UDPConnection(sd, (struct sockaddr*)&server);
+        return new UDPConnection(sd, server);
     }
 }
 

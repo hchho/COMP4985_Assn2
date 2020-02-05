@@ -80,3 +80,20 @@ void MainWindow::on_connectBtn_clicked()
         ConnectivityManager::instance()->closeConnection(currConnection);
     }
 }
+
+void MainWindow::on_receiveBtn_clicked()
+{
+    while(isConnected) {
+        string rawInput = currConnection->receive();
+        QString input = QString::fromStdString(rawInput);
+        ui->bytesReceivedOutput->setText(input);
+    }
+}
+
+void MainWindow::on_sendPacketBtn_clicked()
+{
+    if (currConnection->send("Hello world") == -1) {
+        int error = WSAGetLastError();
+        ErrorHandler::showMessage("Error sending data");
+    }
+}

@@ -26,6 +26,10 @@ private slots:
 
     void on_connectBtn_clicked();
 
+    void on_receiveBtn_clicked();
+
+    void on_sendPacketBtn_clicked();
+
 private:
     Ui::MainWindow *ui;
     ConnectionType connectionType;
