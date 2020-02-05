@@ -74,7 +74,7 @@ Connection* ConnectivityManager::initializeClientConnection(ProtocolType protoco
 Connection* ConnectivityManager::initializeServerConnection(ProtocolType protocol, SOCKET sd, struct	sockaddr_in *server) {
     server->sin_addr.s_addr = htonl(INADDR_ANY); // Accept connections from any client
 
-    if(::bind (sd, (struct sockaddr *)server, sizeof(*server)) == SOCKET_ERROR) {
+    if(bind (sd, (struct sockaddr *)server, sizeof(*server)) == SOCKET_ERROR) {
         ErrorHandler::showMessage("Error binding socket");
         exit(1);
     }

@@ -69,7 +69,7 @@ void MainWindow::on_connectBtn_clicked()
             return;
         }
         QString rawIp = ui->ipAddressInput->text();
-        string stringIp = rawIp.toStdString();
+        std::string stringIp = rawIp.toStdString();
         const char *ipAddress = stringIp.c_str();
         currConnection = ConnectivityManager::instance()->initializeConnection(connectionType, protocolType, port, ipAddress);
 
@@ -84,7 +84,7 @@ void MainWindow::on_connectBtn_clicked()
 void MainWindow::on_receiveBtn_clicked()
 {
     while(isConnected) {
-        string rawInput = currConnection->receive();
+        std::string rawInput = currConnection->receive();
         QString input = QString::fromStdString(rawInput);
         ui->bytesReceivedOutput->setText(input);
     }

@@ -4,8 +4,6 @@
 #include <string>
 #include <QMessageBox>
 
-using namespace std;
-
 struct ErrorHandler {
     static void showMessage(QString msg) {
         QMessageBox messageBox;

@@ -9,8 +9,6 @@
 
 #define MAXLEN 60000
 
-using namespace std;
-
 class Connection {
 protected:
     SOCKET sd;
@@ -24,8 +22,8 @@ public:
         delete[] buf;
     }
     virtual Connection* initClientConnection() = 0;
-    virtual int send(string data) = 0;
-    virtual string receive() = 0;
+    virtual int send(std::string data) = 0;
+    virtual std::string receive() = 0;
     virtual void stop() {
         WSACleanup();
     }
@@ -35,10 +33,10 @@ class TCPConnection : public Connection {
 public:
     TCPConnection() : Connection() {}
     TCPConnection(SOCKET s) : Connection(s) {}
-    int send(string data) override {
+    int send(std::string data) override {
         return 0;
     }
-    string receive() override {
+    std::string receive() override {
         return "";
     }
     Connection * initClientConnection() override {
@@ -58,17 +56,17 @@ public:
         client_len = sizeof(*client);
         server_len = sizeof(*server);
     }
-    int send(string data) override {
+    int send(std::string data) override {
         return sendto(sd, data.c_str(), sizeof(data), 0, (struct sockaddr*)server, server_len);
     }
-    string receive() override {
+    std::string receive() override {
         int n;
         if ((n = recvfrom(sd, buf, MAXLEN, 0, (struct sockaddr*)client, &client_len)) < 0) {
             int err = WSAGetLastError();
             ErrorHandler::showMessage("Received wrong output. Exiting...");
             exit(1);
         }
-        string output(buf);
+        std::string output(buf);
         return output;
     }
     Connection * initClientConnection() override {
@@ -76,7 +74,7 @@ public:
         client->sin_port = htons(0);  // bind to any available port
         client->sin_addr.s_addr = htonl(INADDR_ANY);
 
-        if(::bind(sd, (struct sockaddr *)client, client_len) == SOCKET_ERROR) {
+        if(bind(sd, (struct sockaddr *)client, client_len) == SOCKET_ERROR) {
             ErrorHandler::showMessage("Error binding socket");
             exit(1);
         };
