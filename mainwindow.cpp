@@ -83,11 +83,11 @@ void MainWindow::on_connectBtn_clicked()
 
 void MainWindow::on_receiveBtn_clicked()
 {
-    while(isConnected) {
+//    while(isConnected) {
         std::string rawInput = currConnection->receive();
         QString input = QString::fromStdString(rawInput);
         ui->bytesReceivedOutput->setText(input);
-    }
+//    }
 }
 
 void MainWindow::on_sendPacketBtn_clicked()

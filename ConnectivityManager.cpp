@@ -67,7 +67,7 @@ Connection* ConnectivityManager::initializeClientConnection(ProtocolType protoco
     case ProtocolType::UDP:
         connection = new UDPConnection(sd, server);
     }
-    //connection->initClientConnection();
+    connection->initClientConnection();
     return connection;
 }
 

@@ -50,8 +50,12 @@ private:
     struct sockaddr_in *client, *server;
 public:
     UDPConnection(): Connection() {}
-    UDPConnection(SOCKET s, struct	sockaddr_in *ss) : Connection(s), server(ss) {
+    UDPConnection(SOCKET s, struct	sockaddr_in *ss) : Connection(s) {
         client = (struct sockaddr_in*)malloc(sizeof(*client));
+
+        server = (struct sockaddr_in*)malloc(sizeof(*server));
+
+        memcpy(server, ss, sizeof(*server));
 
         client_len = sizeof(*client);
         server_len = sizeof(*server);
@@ -63,7 +67,6 @@ public:
     std::string receive() override {
         int n;
         if ((n = recvfrom(sd, buf, MAXLEN, 0, (struct sockaddr*)client, &client_len)) < 0) {
-            int err = WSAGetLastError();
             ErrorHandler::showMessage("Received wrong output. Exiting...");
             exit(1);
         }
@@ -71,19 +74,10 @@ public:
         return output;
     }
     Connection * initClientConnection() override {
-//        client->sin_family = AF_INET;
-//        client->sin_port = htons(0);  // bind to any available port
-//        client->sin_addr.s_addr = htonl(INADDR_ANY);
-
-//        if(bind(sd, (struct sockaddr *)client, client_len) == SOCKET_ERROR) {
-//            ErrorHandler::showMessage("Error binding socket");
-//            exit(1);
-//        };
-
-//        if(getsockname (sd, (struct sockaddr *)client, &client_len) < 0) {
-//            ErrorHandler::showMessage("Error getting socket name");
-//            exit(1);
-//        };
+        if (setsockopt( sd, SOL_SOCKET, SO_SNDBUF, buf, sizeof(buf)) != 0) {
+            ErrorHandler::showMessage("Error setting socket");
+            exit(1);
+        }
 
         return this;
     }
