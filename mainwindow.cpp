@@ -81,6 +81,13 @@ void MainWindow::on_connectBtn_clicked()
     }
 }
 
+void MainWindow::on_sendPacketBtn_clicked()
+{
+    if (currConnection->sendToServer("Hello world") == -1) {
+        ErrorHandler::showMessage("Error sending data");
+    }
+}
+
 void MainWindow::on_receiveBtn_clicked()
 {
 //    while(isConnected) {
@@ -88,12 +95,4 @@ void MainWindow::on_receiveBtn_clicked()
         QString input = QString::fromStdString(rawInput);
         ui->bytesReceivedOutput->setText(input);
 //    }
-}
-
-void MainWindow::on_sendPacketBtn_clicked()
-{
-    if (currConnection->send("Hello world") == -1) {
-        int error = WSAGetLastError();
-        ErrorHandler::showMessage("Error sending data");
-    }
 }

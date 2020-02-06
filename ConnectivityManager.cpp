@@ -63,9 +63,11 @@ Connection* ConnectivityManager::initializeClientConnection(ProtocolType protoco
     memcpy((char *)&server->sin_addr, hp->h_addr, hp->h_length);
     switch(protocol) {
     case ProtocolType::TCP:
-        connection = new TCPConnection(sd);
+        connection = new TCPConnection(sd, server);
+        break;
     case ProtocolType::UDP:
         connection = new UDPConnection(sd, server);
+        break;
     }
     connection->initClientConnection();
     return connection;
@@ -81,7 +83,7 @@ Connection* ConnectivityManager::initializeServerConnection(ProtocolType protoco
 
     switch(protocol) {
     case ProtocolType::TCP:
-        return new TCPConnection(sd);
+        return new TCPConnection(sd, server);
     case ProtocolType::UDP:
         return new UDPConnection(sd, server);
     }

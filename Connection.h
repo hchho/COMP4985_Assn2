@@ -7,22 +7,34 @@
 #include <WinSock2.h>
 #include "ErrorHandler.h"
 
-#define MAXLEN 60000
+#define MAXLEN  60000
+#define BUFSIZE 255
 
 class Connection {
 protected:
     SOCKET sd;
     char *buf;
+    struct sockaddr_in *client, *server;
+    int client_len, server_len;
 public:
     Connection() = default;
-    Connection(SOCKET s) : sd(s) {
+    Connection(SOCKET s, struct sockaddr_in* ss) : sd(s) {
         buf = new char[MAXLEN];
+        client = (struct sockaddr_in*)malloc(sizeof(*client));
+        server = (struct sockaddr_in*)malloc(sizeof(*server));
+
+        client_len = sizeof(*client);
+        server_len = sizeof(*server);
+
+        memcpy(server, ss, sizeof(*server));
     }
     virtual ~Connection() {
         delete[] buf;
+        delete client;
+        delete server;
     }
-    virtual Connection* initClientConnection() = 0;
-    virtual int send(std::string data) = 0;
+    virtual void initClientConnection() = 0;
+    virtual int sendToServer(std::string data) = 0;
     virtual std::string receive() = 0;
     virtual void stop() {
         WSACleanup();
@@ -30,57 +42,55 @@ public:
 };
 
 class TCPConnection : public Connection {
+private:
+    SOCKET new_sd;
 public:
     TCPConnection() : Connection() {}
-    TCPConnection(SOCKET s) : Connection(s) {}
-    int send(std::string data) override {
-        return 0;
+    TCPConnection(SOCKET s, struct	sockaddr_in *ss) : Connection(s, ss) {}
+    int sendToServer(std::string data) override {
+        return send(sd, data.c_str(), BUFSIZE, 0);
     }
     std::string receive() override {
-        return "";
+        int n;
+        int bytes_to_read;
+        char* bp;
+        listen(sd, 1);
+        if ((new_sd = accept (sd, (struct sockaddr *)client, &client_len)) == -1)
+        {
+            ErrorHandler::showMessage("Can't accept client");
+            exit(1);
+        }
+
+        bp = buf;
+        bytes_to_read = BUFSIZE;
+
+        while ((n = recv (new_sd, bp, bytes_to_read, 0)) < BUFSIZE)
+        {
+            bp += n;
+            bytes_to_read -= n;
+            if (n == 0)
+                break;
+        }
+        closesocket(new_sd);
+        return bp;
     }
-    Connection * initClientConnection() override {
-        return nullptr;
+    void initClientConnection() override {
+        if (connect (sd, (struct sockaddr *)server, server_len) == -1)
+        {
+            int error = WSAGetLastError();
+            ErrorHandler::showMessage("Can't connect to sever");
+            exit(1);
+        }
     }
 };
 
 class UDPConnection : public Connection {
-private:
-    int client_len, server_len;
-    struct sockaddr_in *client, *server;
 public:
     UDPConnection(): Connection() {}
-    UDPConnection(SOCKET s, struct	sockaddr_in *ss) : Connection(s) {
-        client = (struct sockaddr_in*)malloc(sizeof(*client));
-
-        server = (struct sockaddr_in*)malloc(sizeof(*server));
-
-        memcpy(server, ss, sizeof(*server));
-
-        client_len = sizeof(*client);
-        server_len = sizeof(*server);
-    }
-    int send(std::string data) override {
-        const char *output = data.c_str();
-        return sendto(sd, output, sizeof(output), 0, (struct sockaddr*)server, server_len);
-    }
-    std::string receive() override {
-        int n;
-        if ((n = recvfrom(sd, buf, MAXLEN, 0, (struct sockaddr*)client, &client_len)) < 0) {
-            ErrorHandler::showMessage("Received wrong output. Exiting...");
-            exit(1);
-        }
-        std::string output(buf);
-        return output;
-    }
-    Connection * initClientConnection() override {
-        if (setsockopt( sd, SOL_SOCKET, SO_SNDBUF, buf, sizeof(buf)) != 0) {
-            ErrorHandler::showMessage("Error setting socket");
-            exit(1);
-        }
-
-        return this;
-    }
+    UDPConnection(SOCKET s, struct	sockaddr_in *ss) : Connection(s, ss) {}
+    int sendToServer(std::string data) override;
+    std::string receive() override;
+    void initClientConnection() override;
 };
 
 #endif // CONNECTION_H
