@@ -8,7 +8,6 @@
 #include "ErrorHandler.h"
 
 #define MAXLEN  60000
-#define BUFSIZE 255
 
 class Connection {
 protected:
@@ -43,50 +42,19 @@ public:
 
 class TCPConnection : public Connection {
 private:
+    static int constexpr BUFSIZE = 255;
     SOCKET new_sd;
 public:
-    TCPConnection() : Connection() {}
+    TCPConnection() = default;
     TCPConnection(SOCKET s, struct	sockaddr_in *ss) : Connection(s, ss) {}
-    int sendToServer(std::string data) override {
-        return send(sd, data.c_str(), BUFSIZE, 0);
-    }
-    std::string receive() override {
-        int n;
-        int bytes_to_read;
-        char* bp;
-        listen(sd, 1);
-        if ((new_sd = accept (sd, (struct sockaddr *)client, &client_len)) == -1)
-        {
-            ErrorHandler::showMessage("Can't accept client");
-            exit(1);
-        }
-
-        bp = buf;
-        bytes_to_read = BUFSIZE;
-
-        while ((n = recv (new_sd, bp, bytes_to_read, 0)) < BUFSIZE)
-        {
-            bp += n;
-            bytes_to_read -= n;
-            if (n == 0)
-                break;
-        }
-        closesocket(new_sd);
-        return bp;
-    }
-    void initClientConnection() override {
-        if (connect (sd, (struct sockaddr *)server, server_len) == -1)
-        {
-            int error = WSAGetLastError();
-            ErrorHandler::showMessage("Can't connect to sever");
-            exit(1);
-        }
-    }
+    int sendToServer(std::string data) override;
+    std::string receive() override;
+    void initClientConnection() override;
 };
 
 class UDPConnection : public Connection {
 public:
-    UDPConnection(): Connection() {}
+    UDPConnection() = default;
     UDPConnection(SOCKET s, struct	sockaddr_in *ss) : Connection(s, ss) {}
     int sendToServer(std::string data) override;
     std::string receive() override;
