@@ -22,10 +22,10 @@ Connection* ConnectivityManager::initializeConnection(ConnectionType connectionT
 
     switch(protocol) {
     case ProtocolType::TCP:
-        sd = socket(AF_INET, SOCK_STREAM, 0);
+        sd = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
         break;
     case ProtocolType::UDP:
-        sd = socket (PF_INET, SOCK_DGRAM, 0);
+        sd = WSASocket (PF_INET, SOCK_DGRAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
         break;
     }
 

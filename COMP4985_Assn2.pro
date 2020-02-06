@@ -27,6 +27,7 @@ HEADERS += \
     ConnectivityManager.h \
     ErrorHandler.h \
     ProtocolType.h \
+    SocketInfo.h \
     mainwindow.h
 
 FORMS += \
