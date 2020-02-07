@@ -108,6 +108,7 @@ void MainWindow::on_sendPacketBtn_clicked()
             ErrorHandler::showMessage("Error sending packets");
         }
         ui->sendPacketBtn->setText("Send Packet");
+        delete sendInfo;
     }
 }
 
@@ -167,18 +168,22 @@ DWORD WINAPI MainWindow::UIThread(void* param) {
     Ui::MainWindow *ui = window->getUI();
     Connection* connection = (Connection*)window->getConnection();
     LPSOCKET_INFORMATION socketInfo = connection->getSocketInfo();
+
     char* buf = (char*)malloc(DATA_BUFSIZE);
     memset(buf, 0, DATA_BUFSIZE);
     while(TRUE) {
         buf = socketInfo->Buffer;
         int sizeOfBuffer = std::strlen(buf);
         if (sizeOfBuffer > 0) {
+            QString prevValue = ui->packetsReceivedOutput->text();
+            int prevSize = prevValue.toInt();
             char c[10];
-            itoa(sizeOfBuffer, c, 10);
+            itoa(prevSize + sizeOfBuffer, c, 10);
             std::string rawInput{c};
             QString input = QString::fromStdString(rawInput);
             ui->packetsReceivedOutput->setText(input);
         }
+        memset(buf, 0, DATA_BUFSIZE);
     }
     return TRUE;
 }
