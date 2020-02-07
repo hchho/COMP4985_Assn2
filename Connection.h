@@ -44,7 +44,7 @@ public:
         delete server;
     }
     virtual void initClientConnection() = 0;
-    virtual int sendToServer(std::string data) = 0;
+    virtual int sendToServer(const char* data) = 0;
     virtual void startRoutine() = 0;
     virtual void stopRoutine() {}
     virtual void stop() {
@@ -66,12 +66,12 @@ public:
 
 class TCPConnection : public Connection {
 private:
-    static int constexpr BUFSIZE = 255;
+    static int constexpr BUFSIZE = MAXLEN;
     SOCKET AcceptSocket;
 public:
     TCPConnection() = default;
     TCPConnection(SOCKET s, struct	sockaddr_in *ss) : Connection(s, ss) {}
-    int sendToServer(std::string data) override;
+    int sendToServer(const char* data) override;
     void initClientConnection() override;
     void startRoutine() override;
     void stopRoutine() override;
@@ -88,7 +88,7 @@ class UDPConnection : public Connection {
 public:
     UDPConnection() = default;
     UDPConnection(SOCKET s, struct	sockaddr_in *ss) : Connection(s, ss) {}
-    int sendToServer(std::string data) override;
+    int sendToServer(const char* data) override;
     void startRoutine() override;
     void initClientConnection() override;
     static DWORD WINAPI WorkerThread(LPVOID lpParameter);

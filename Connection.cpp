@@ -1,7 +1,7 @@
 #include "Connection.h"
 
-int TCPConnection::sendToServer(std::string data) {
-    return send(sd, data.c_str(), BUFSIZE, 0);
+int TCPConnection::sendToServer(const char* data) {
+    return send(sd, data, BUFSIZE, 0);
 }
 
 void TCPConnection::startRoutine() {
@@ -105,18 +105,11 @@ void TCPConnection::initClientConnection() {
     }
 }
 
-int UDPConnection::sendToServer(std::string data) {
-    const char *output = data.c_str();
-    return sendto(sd, output, sizeof(output), 0, (struct sockaddr*)server, server_len);
+int UDPConnection::sendToServer(const char* data) {
+    return sendto(sd, data, std::strlen(data), 0, (struct sockaddr*)server, server_len);
 }
 
 void UDPConnection::startRoutine() {
-//    int n;
-//    if ((n = recvfrom(sd, buf, MAXLEN, 0, (struct sockaddr*)client, &client_len)) < 0) {
-//        ErrorHandler::showMessage("Received wrong output. Exiting...");
-//        exit(1);
-//    }
-//    std::string output(buf);
     if ((ServerThreadHandle = CreateThread(NULL, 0, WorkerThread, (LPVOID) this, 0, &ServerThreadId)) == NULL)
     {
         ErrorHandler::showMessage("Error creating thread");

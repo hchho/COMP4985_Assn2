@@ -88,8 +88,15 @@ void MainWindow::on_connectBtn_clicked()
 
 void MainWindow::on_sendPacketBtn_clicked()
 {
-    if (isConnected && connectionType == ConnectionType::CLIENT && currConnection->sendToServer("Hello world") == -1) {
-        ErrorHandler::showMessage("Error sending data");
+    if (isConnected && connectionType == ConnectionType::CLIENT) {
+        QComboBox *packetSizeComboBox = ui->packetSizeOptions;
+        QString packetSizeValue = packetSizeComboBox->itemText(packetSizeComboBox->currentIndex());
+        int numberOfBytesToSend = packetSizeValue.toInt();
+        char* output = (char*)malloc(numberOfBytesToSend);
+        memset(output, 'a', numberOfBytesToSend);
+        if (currConnection->sendToServer(output) == -1) {
+            ErrorHandler::showMessage("Error sending data");
+        }
     }
 }
 
