@@ -31,6 +31,12 @@ public:
         server_len = sizeof(*server);
 
         memcpy(server, ss, sizeof(*server));
+
+        if ((SocketInfo = (LPSOCKET_INFORMATION) GlobalAlloc(GPTR,
+                                                             sizeof(SOCKET_INFORMATION))) == NULL)
+        {
+            ErrorHandler::showMessage("GlobalAlloc() failed");
+        }
     }
     virtual ~Connection() {
         delete[] buf;
@@ -64,13 +70,7 @@ private:
     SOCKET AcceptSocket;
 public:
     TCPConnection() = default;
-    TCPConnection(SOCKET s, struct	sockaddr_in *ss) : Connection(s, ss) {
-        if ((SocketInfo = (LPSOCKET_INFORMATION) GlobalAlloc(GPTR,
-                                                             sizeof(SOCKET_INFORMATION))) == NULL)
-        {
-            ErrorHandler::showMessage("GlobalAlloc() failed");
-        }
-    }
+    TCPConnection(SOCKET s, struct	sockaddr_in *ss) : Connection(s, ss) {}
     int sendToServer(std::string data) override;
     void initClientConnection() override;
     void startRoutine() override;
