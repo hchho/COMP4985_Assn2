@@ -12,6 +12,10 @@
 
 class Connection {
 protected:
+    HANDLE ServerThreadHandle;
+    DWORD ServerThreadId;
+    WSAEVENT AcceptEvent;
+    LPSOCKET_INFORMATION SocketInfo;
     SOCKET sd;
     char *buf;
     struct sockaddr_in *client, *server;
@@ -40,17 +44,24 @@ public:
     virtual void stop() {
         WSACleanup();
     }
-
+    SOCKET getListenSocket() const {
+        return sd;
+    }
+    WSAEVENT getAcceptEvent() const {
+        return AcceptEvent;
+    }
+    void setAcceptEvent(const WSAEVENT e) {
+        AcceptEvent = e;
+    }
+    LPSOCKET_INFORMATION getSocketInfo() {
+        return SocketInfo;
+    }
 };
 
 class TCPConnection : public Connection {
 private:
     static int constexpr BUFSIZE = 255;
     SOCKET AcceptSocket;
-    WSAEVENT AcceptEvent;
-    HANDLE ServerThreadHandle;
-    DWORD ServerThreadId;
-    LPSOCKET_INFORMATION SocketInfo;
 public:
     TCPConnection() = default;
     TCPConnection(SOCKET s, struct	sockaddr_in *ss) : Connection(s, ss) {
@@ -64,20 +75,11 @@ public:
     void initClientConnection() override;
     void startRoutine() override;
     void stopRoutine() override;
-    WSAEVENT getAcceptEvent() const {
-        return AcceptEvent;
-    }
     SOCKET getAcceptSocket() const {
         return AcceptSocket;
     }
-    SOCKET getListenSocket() const {
-        return sd;
-    }
     void setAcceptSocket(const SOCKET s) {
         AcceptSocket = s;
-    }
-    LPSOCKET_INFORMATION getSocketInfo() {
-        return SocketInfo;
     }
     static DWORD WINAPI WorkerThread(LPVOID lpParameter);
 };
@@ -89,6 +91,7 @@ public:
     int sendToServer(std::string data) override;
     void startRoutine() override;
     void initClientConnection() override;
+    static DWORD WINAPI WorkerThread(LPVOID lpParameter);
 };
 
 #endif // CONNECTION_H
