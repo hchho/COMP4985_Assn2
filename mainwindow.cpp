@@ -108,7 +108,7 @@ void MainWindow::on_receiveBtn_clicked()
 DWORD WINAPI MainWindow::UIThread(void* param) {
     MainWindow* window = (MainWindow*) param;
     Ui::MainWindow *ui = window->getUI();
-    TCPConnection* connection = (TCPConnection*)window->getConnection();
+    Connection* connection = (Connection*)window->getConnection();
     LPSOCKET_INFORMATION socketInfo = connection->getSocketInfo();
     while(TRUE) {
         ui->packetsReceivedOutput->setText(socketInfo->Buffer);
