@@ -101,7 +101,7 @@ void MainWindow::on_sendPacketBtn_clicked()
         sendInfo->packetSize = numberOfBytesToSend;
         sendInfo->numberOfTimesToSend = numberOfTimesToSend;
 
-        sendThreadHandle = CreateThread(NULL, 0, UIThread, (void *) sendInfo, 0, &sendThreadId);
+        sendThreadHandle = CreateThread(NULL, 0, SendThread, (void *) sendInfo, 0, &sendThreadId);
 
         ui->sendPacketBtn->setText("Sending...");
         if(WaitForSingleObject(sendThreadHandle, INFINITE)) {
