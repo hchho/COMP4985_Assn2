@@ -84,7 +84,7 @@ DWORD WINAPI TCPConnection::WorkerThread(LPVOID lpParameter) {
 
         Flags = 0;
         if (WSARecv(connection->getSocketInfo()->Socket, &(connection->getSocketInfo()->DataBuf), 1, &RecvBytes, &Flags,
-                    &(connection->getSocketInfo()->Overlapped), WorkerRoutine) == SOCKET_ERROR)
+                    &(connection->getSocketInfo()->Overlapped), TCPWorkerRoutine) == SOCKET_ERROR)
         {
             if (WSAGetLastError() != WSA_IO_PENDING)
             {
@@ -111,24 +111,23 @@ int UDPConnection::sendToServer(std::string data) {
 }
 
 void UDPConnection::startRoutine() {
-    int n;
-    if ((n = recvfrom(sd, buf, MAXLEN, 0, (struct sockaddr*)client, &client_len)) < 0) {
-        ErrorHandler::showMessage("Received wrong output. Exiting...");
+//    int n;
+//    if ((n = recvfrom(sd, buf, MAXLEN, 0, (struct sockaddr*)client, &client_len)) < 0) {
+//        ErrorHandler::showMessage("Received wrong output. Exiting...");
+//        exit(1);
+//    }
+//    std::string output(buf);
+    if ((ServerThreadHandle = CreateThread(NULL, 0, WorkerThread, (LPVOID) this, 0, &ServerThreadId)) == NULL)
+    {
+        ErrorHandler::showMessage("Error creating thread");
         exit(1);
     }
-    std::string output(buf);
     return;
 }
 
 void UDPConnection::initClientConnection() {
     if (setsockopt( sd, SOL_SOCKET, SO_SNDBUF, buf, sizeof(buf)) != 0) {
         ErrorHandler::showMessage("Error setting socket");
-        exit(1);
-    }
-
-    if ((ServerThreadHandle = CreateThread(NULL, 0, WorkerThread, (LPVOID) this, 0, &ServerThreadId)) == NULL)
-    {
-        ErrorHandler::showMessage("Error creating thread");
         exit(1);
     }
 }
@@ -189,7 +188,7 @@ DWORD WINAPI UDPConnection::WorkerThread(LPVOID lpParameter) {
 
         Flags = 0;
         if (WSARecv(connection->getSocketInfo()->Socket, &(connection->getSocketInfo()->DataBuf), 1, &RecvBytes, &Flags,
-                    &(connection->getSocketInfo()->Overlapped), WorkerRoutine) == SOCKET_ERROR)
+                    &(connection->getSocketInfo()->Overlapped), UDPWorkerRoutine) == SOCKET_ERROR)
         {
             if (WSAGetLastError() != WSA_IO_PENDING)
             {
