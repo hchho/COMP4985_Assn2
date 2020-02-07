@@ -89,14 +89,25 @@ void MainWindow::on_connectBtn_clicked()
 void MainWindow::on_sendPacketBtn_clicked()
 {
     if (isConnected && connectionType == ConnectionType::CLIENT) {
-        QComboBox *packetSizeComboBox = ui->packetSizeOptions;
-        QString packetSizeValue = packetSizeComboBox->itemText(packetSizeComboBox->currentIndex());
-        int numberOfBytesToSend = packetSizeValue.toInt();
-        char* output = (char*)malloc(numberOfBytesToSend);
-        memset(output, 'a', numberOfBytesToSend);
-        if (currConnection->sendToServer(output) == -1) {
-            ErrorHandler::showMessage("Error sending data");
+        HANDLE sendThreadHandle;
+        DWORD sendThreadId;
+
+        SEND_INFO *sendInfo = (SEND_INFO*)malloc(sizeof(SEND_INFO));
+
+        int numberOfBytesToSend = getPacketSize();
+        int numberOfTimesToSend = getNumberOfTimesToSend();
+
+        sendInfo->connection = currConnection;
+        sendInfo->packetSize = numberOfBytesToSend;
+        sendInfo->numberOfTimesToSend = numberOfTimesToSend;
+
+        sendThreadHandle = CreateThread(NULL, 0, UIThread, (void *) sendInfo, 0, &sendThreadId);
+
+        ui->sendPacketBtn->setText("Sending...");
+        if(WaitForSingleObject(sendThreadHandle, INFINITE)) {
+            ErrorHandler::showMessage("Error sending packets");
         }
+        ui->sendPacketBtn->setText("Send Packet");
     }
 }
 
@@ -116,6 +127,39 @@ void MainWindow::on_receiveBtn_clicked()
         ui->receiveBtn->setText("Begin receiving");
         CloseHandle(UIThreadHandle);
     }
+}
+
+int MainWindow::getPacketSize() {
+    QComboBox *packetSizeComboBox = ui->packetSizeOptions;
+    QString packetSizeValue = packetSizeComboBox->itemText(packetSizeComboBox->currentIndex());
+    int numberOfBytesToSend = packetSizeValue.toInt();
+    return numberOfBytesToSend;
+}
+
+int MainWindow::getNumberOfTimesToSend() {
+    QComboBox *packetCountComboBox = ui->numberOfTimesOptions;
+    QString packetCountValue = packetCountComboBox->itemText(packetCountComboBox->currentIndex());
+    int numberOfTimesToSend = packetCountValue.toInt();
+    return numberOfTimesToSend;
+}
+
+DWORD WINAPI MainWindow::SendThread(void* param) {
+    SEND_INFO* sendInfo = (SEND_INFO*) param;
+
+    Connection* connection = sendInfo->connection;
+    int packetSize = sendInfo->packetSize;
+    int count = sendInfo->numberOfTimesToSend;
+
+    char* output = (char*)malloc(packetSize);
+    memset(output, 'a', packetSize);
+
+    for(int i = 0; i < count; i++) {
+        if (connection->sendToServer(output) == -1) {
+            perror("Error sending");
+            return FALSE;
+        }
+    }
+    return TRUE;
 }
 
 DWORD WINAPI MainWindow::UIThread(void* param) {
