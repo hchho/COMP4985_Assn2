@@ -13,6 +13,7 @@ typedef struct {
     Connection* connection;
     int packetSize;
     int numberOfTimesToSend;
+    Ui::MainWindow *ui;
 } SEND_INFO;
 
 class MainWindow : public QMainWindow

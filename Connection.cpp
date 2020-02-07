@@ -21,10 +21,6 @@ void TCPConnection::startRoutine() {
     return;
 }
 
-void TCPConnection::stopRoutine() {
-    CloseHandle(ServerThreadHandle);
-}
-
 DWORD WINAPI TCPConnection::WorkerThread(LPVOID lpParameter) {
     DWORD Flags;
     WSAEVENT EventArray[1];

@@ -45,7 +45,9 @@ public:
     virtual void initClientConnection() = 0;
     virtual int sendToServer(const char* data) = 0;
     virtual void startRoutine() = 0;
-    virtual void stopRoutine() {}
+    void stopRoutine() {
+        CloseHandle(ServerThreadHandle);
+    }
     virtual void stop() {
         WSACleanup();
     }
@@ -73,7 +75,6 @@ public:
     int sendToServer(const char* data) override;
     void initClientConnection() override;
     void startRoutine() override;
-    void stopRoutine() override;
     SOCKET getAcceptSocket() const {
         return AcceptSocket;
     }

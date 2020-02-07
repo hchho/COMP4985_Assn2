@@ -100,6 +100,7 @@ void MainWindow::on_sendPacketBtn_clicked()
         sendInfo->connection = currConnection;
         sendInfo->packetSize = numberOfBytesToSend;
         sendInfo->numberOfTimesToSend = numberOfTimesToSend;
+        sendInfo->ui = ui;
 
         sendThreadHandle = CreateThread(NULL, 0, SendThread, (void *) sendInfo, 0, &sendThreadId);
 
@@ -148,6 +149,7 @@ DWORD WINAPI MainWindow::SendThread(void* param) {
     SEND_INFO* sendInfo = (SEND_INFO*) param;
 
     Connection* connection = sendInfo->connection;
+    Ui::MainWindow *ui = sendInfo->ui;
     int packetSize = sendInfo->packetSize;
     int count = sendInfo->numberOfTimesToSend;
 
@@ -159,6 +161,8 @@ DWORD WINAPI MainWindow::SendThread(void* param) {
             perror("Error sending");
             return FALSE;
         }
+        ui->bytesSentOutput->setText(QString::number(packetSize * (i+ 1)));
+        ui->packetsSentOutput->setText(QString::number(i + 1));
     }
     return TRUE;
 }
