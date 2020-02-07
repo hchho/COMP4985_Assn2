@@ -90,7 +90,7 @@ void MainWindow::on_sendPacketBtn_clicked()
 
 void MainWindow::on_receiveBtn_clicked()
 {
-    std::string rawInput = currConnection->receive();
-    QString input = QString::fromStdString(rawInput);
-    ui->bytesReceivedOutput->setText(input);
+//    std::string rawInput = currConnection->receive();
+//    QString input = QString::fromStdString(rawInput);
+//    ui->bytesReceivedOutput->setText(input);
 }

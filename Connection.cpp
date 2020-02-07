@@ -16,13 +16,13 @@ void TCPConnection::startRoutine() {
         exit(1);
     }
 
-    if ((ThreadHandle = CreateThread(NULL, 0, WorkerThread, (LPVOID) AcceptEvent, 0, &ThreadId)) == NULL)
+    if ((ThreadHandle = CreateThread(NULL, 0, WorkerThread, (LPVOID) this, 0, &ThreadId)) == NULL)
     {
         ErrorHandler::showMessage("Error creating thread");
         exit(1);
     }
 
-    if ((new_sd = accept (sd, NULL, NULL)) == -1) {
+    if ((AcceptSocket = accept (sd, NULL, NULL)) == -1) {
         ErrorHandler::showMessage("Can't accept client");
         exit(1);
     }
@@ -63,8 +63,9 @@ DWORD WINAPI TCPConnection::WorkerThread(LPVOID lpParameter) {
     DWORD RecvBytes;
 
     // Save the accept event in the event array.
+    TCPConnection *connection = (TCPConnection*) lpParameter;
 
-    EventArray[0] = (WSAEVENT) lpParameter;
+    EventArray[0] = connection->getAcceptEvent();
 
     while(TRUE)
     {
@@ -100,7 +101,7 @@ DWORD WINAPI TCPConnection::WorkerThread(LPVOID lpParameter) {
 
         // Fill in the details of our accepted socket.
 
-        SocketInfo->Socket = AcceptSocket;
+        SocketInfo->Socket = connection->getAcceptSocket();
         ZeroMemory(&(SocketInfo->Overlapped), sizeof(WSAOVERLAPPED));
         SocketInfo->BytesSEND = 0;
         SocketInfo->BytesRECV = 0;
@@ -113,13 +114,13 @@ DWORD WINAPI TCPConnection::WorkerThread(LPVOID lpParameter) {
         {
             if (WSAGetLastError() != WSA_IO_PENDING)
             {
-                ErrorHandler::showMessage("I/O operation failed with error);
+                ErrorHandler::showMessage("I/O operation failed with error");
                                           return FALSE;
             }
         }
     }
 
-    return 1;
+    return TRUE;
 };
 
 void TCPConnection::initClientConnection() {
@@ -135,14 +136,14 @@ int UDPConnection::sendToServer(std::string data) {
     return sendto(sd, output, sizeof(output), 0, (struct sockaddr*)server, server_len);
 }
 
-std::string UDPConnection::receive() {
+void UDPConnection::startRoutine() {
     int n;
     if ((n = recvfrom(sd, buf, MAXLEN, 0, (struct sockaddr*)client, &client_len)) < 0) {
         ErrorHandler::showMessage("Received wrong output. Exiting...");
         exit(1);
     }
     std::string output(buf);
-    return output;
+    return;
 }
 
 void UDPConnection::initClientConnection() {

@@ -18,6 +18,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     Connection.cpp \
     ConnectivityManager.cpp \
+    SocketInfo.cpp \
     main.cpp \
     mainwindow.cpp
 

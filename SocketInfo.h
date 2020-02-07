@@ -14,4 +14,7 @@ typedef struct _SOCKET_INFORMATION {
    DWORD BytesRECV;
 } SOCKET_INFORMATION, * LPSOCKET_INFORMATION;
 
+void CALLBACK WorkerRoutine(DWORD Error, DWORD BytesTransferred,
+                            LPWSAOVERLAPPED Overlapped, DWORD InFlags);
+
 #endif // SOCKETINFO_H
