@@ -73,15 +73,6 @@ DWORD WINAPI TCPConnection::WorkerThread(LPVOID lpParameter) {
 
         WSAResetEvent(EventArray[Index - WSA_WAIT_EVENT_0]);
 
-        // Create a socket information structure to associate with the accepted socket.
-
-//        if ((SocketInfo = (LPSOCKET_INFORMATION) GlobalAlloc(GPTR,
-//                                                             sizeof(SOCKET_INFORMATION))) == NULL)
-//        {
-//            ErrorHandler::showMessage("GlobalAlloc() failed");
-//            return FALSE;
-//        }
-
         // Fill in the details of our accepted socket.
 
         connection->getSocketInfo()->Socket = connection->getAcceptSocket();
@@ -104,7 +95,7 @@ DWORD WINAPI TCPConnection::WorkerThread(LPVOID lpParameter) {
     }
 
     return TRUE;
-};
+}
 
 void TCPConnection::initClientConnection() {
     if (connect (sd, (struct sockaddr *)server, server_len) == -1)
