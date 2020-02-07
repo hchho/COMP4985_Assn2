@@ -104,9 +104,6 @@ void MainWindow::on_receiveBtn_clicked()
         ui->receiveBtn->setText("Begin receiving");
         CloseHandle(UIThreadHandle);
     }
-//    std::string rawInput = currConnection->receive();
-//    QString input = QString::fromStdString(rawInput);
-//    ui->bytesReceivedOutput->setText(input);
 }
 
 DWORD WINAPI MainWindow::UIThread(void* param) {
