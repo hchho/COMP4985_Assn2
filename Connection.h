@@ -36,6 +36,7 @@ public:
     virtual void initClientConnection() = 0;
     virtual int sendToServer(std::string data) = 0;
     virtual void startRoutine() = 0;
+    virtual void stopRoutine() {}
     virtual void stop() {
         WSACleanup();
     }
@@ -47,14 +48,22 @@ private:
     static int constexpr BUFSIZE = 255;
     SOCKET AcceptSocket;
     WSAEVENT AcceptEvent;
-    HANDLE ThreadHandle;
-    DWORD ThreadId;
+    HANDLE ServerThreadHandle;
+    DWORD ServerThreadId;
+    LPSOCKET_INFORMATION SocketInfo;
 public:
     TCPConnection() = default;
-    TCPConnection(SOCKET s, struct	sockaddr_in *ss) : Connection(s, ss) {}
+    TCPConnection(SOCKET s, struct	sockaddr_in *ss) : Connection(s, ss) {
+        if ((SocketInfo = (LPSOCKET_INFORMATION) GlobalAlloc(GPTR,
+                                                             sizeof(SOCKET_INFORMATION))) == NULL)
+        {
+            ErrorHandler::showMessage("GlobalAlloc() failed");
+        }
+    }
     int sendToServer(std::string data) override;
     void initClientConnection() override;
     void startRoutine() override;
+    void stopRoutine() override;
     WSAEVENT getAcceptEvent() const {
         return AcceptEvent;
     }
@@ -66,6 +75,9 @@ public:
     }
     void setAcceptSocket(const SOCKET s) {
         AcceptSocket = s;
+    }
+    LPSOCKET_INFORMATION getSocketInfo() {
+        return SocketInfo;
     }
     static DWORD WINAPI WorkerThread(LPVOID lpParameter);
 };

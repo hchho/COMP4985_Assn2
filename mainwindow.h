@@ -16,6 +16,13 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    static DWORD WINAPI UIThread(void* param);
+    Ui::MainWindow* getUI() const {
+        return ui;
+    }
+    Connection* getConnection() const {
+        return currConnection;
+    }
 
 private slots:
     void on_actionTCP_triggered();
@@ -36,5 +43,8 @@ private:
     ProtocolType protocolType;
     Connection* currConnection;
     bool isConnected = false;
+    bool isReceiving = false;
+    HANDLE UIThreadHandle;
+    DWORD UIThreadId;
 };
 #endif // MAINWINDOW_H

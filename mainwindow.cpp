@@ -83,15 +83,39 @@ void MainWindow::on_connectBtn_clicked()
 
 void MainWindow::on_sendPacketBtn_clicked()
 {
-    if (currConnection->sendToServer("Hello world") == -1) {
+    if (isConnected && connectionType == ConnectionType::CLIENT && currConnection->sendToServer("Hello world") == -1) {
         ErrorHandler::showMessage("Error sending data");
     }
 }
 
 void MainWindow::on_receiveBtn_clicked()
 {
-    currConnection->startRoutine();
+    isReceiving = !isReceiving;
+    if (isReceiving) {
+        currConnection->startRoutine();
+        ui->receiveBtn->setText("Stop receiving");
+        if ((UIThreadHandle = CreateThread(NULL, 0, UIThread, (LPVOID) this, 0, &UIThreadId)) == NULL)
+        {
+            ErrorHandler::showMessage("Error creating thread");
+            exit(1);
+        }
+    } else {
+        currConnection->stopRoutine();
+        ui->receiveBtn->setText("Begin receiving");
+        CloseHandle(UIThreadHandle);
+    }
 //    std::string rawInput = currConnection->receive();
 //    QString input = QString::fromStdString(rawInput);
 //    ui->bytesReceivedOutput->setText(input);
+}
+
+DWORD WINAPI MainWindow::UIThread(void* param) {
+    MainWindow* window = (MainWindow*) param;
+    Ui::MainWindow *ui = window->getUI();
+    TCPConnection* connection = (TCPConnection*)window->getConnection();
+    LPSOCKET_INFORMATION socketInfo = connection->getSocketInfo();
+    while(TRUE) {
+        ui->packetsReceivedOutput->setText(socketInfo->Buffer);
+    }
+    return TRUE;
 }

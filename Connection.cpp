@@ -5,9 +5,6 @@ int TCPConnection::sendToServer(std::string data) {
 }
 
 void TCPConnection::startRoutine() {
-    int n;
-    int bytes_to_read;
-    char* bp;
     listen(sd, 1);
 
     if ((AcceptEvent = WSACreateEvent()) == WSA_INVALID_EVENT)
@@ -16,19 +13,21 @@ void TCPConnection::startRoutine() {
         exit(1);
     }
 
-    if ((ThreadHandle = CreateThread(NULL, 0, WorkerThread, (LPVOID) this, 0, &ThreadId)) == NULL)
+    if ((ServerThreadHandle = CreateThread(NULL, 0, WorkerThread, (LPVOID) this, 0, &ServerThreadId)) == NULL)
     {
         ErrorHandler::showMessage("Error creating thread");
         exit(1);
     }
-
-    //    closesocket(new_sd);
     return;
+}
+
+void TCPConnection::stopRoutine() {
+    CloseHandle(ServerThreadHandle);
 }
 
 DWORD WINAPI TCPConnection::WorkerThread(LPVOID lpParameter) {
     DWORD Flags;
-    LPSOCKET_INFORMATION SocketInfo;
+//    LPSOCKET_INFORMATION SocketInfo;
     WSAEVENT EventArray[1];
     DWORD Index;
     DWORD RecvBytes;
@@ -37,16 +36,16 @@ DWORD WINAPI TCPConnection::WorkerThread(LPVOID lpParameter) {
     TCPConnection *connection = (TCPConnection*) lpParameter;
 
     if ((accept_socket = accept (connection->getListenSocket(), NULL, NULL)) == -1) {
-        ErrorHandler::showMessage("Can't accept client");
-        exit(1);
+        perror("Can't accept client");
+        return FALSE;
     }
 
     connection->setAcceptSocket(accept_socket);
 
     if (WSASetEvent(connection->getAcceptEvent()) == FALSE)
     {
-        ErrorHandler::showMessage("WSASetEvent failed");
-        exit(1);
+        perror("WSASetEvent failed");
+        return FALSE;
     }
 
     EventArray[0] = connection->getAcceptEvent();
@@ -61,7 +60,7 @@ DWORD WINAPI TCPConnection::WorkerThread(LPVOID lpParameter) {
 
             if (Index == WSA_WAIT_FAILED)
             {
-                ErrorHandler::showMessage("Waiting for multiple events failed");
+                perror("Waiting for multiple events failed");
                 return FALSE;
             }
 
@@ -76,29 +75,29 @@ DWORD WINAPI TCPConnection::WorkerThread(LPVOID lpParameter) {
 
         // Create a socket information structure to associate with the accepted socket.
 
-        if ((SocketInfo = (LPSOCKET_INFORMATION) GlobalAlloc(GPTR,
-                                                             sizeof(SOCKET_INFORMATION))) == NULL)
-        {
-            ErrorHandler::showMessage("GlobalAlloc() failed");
-            return FALSE;
-        }
+//        if ((SocketInfo = (LPSOCKET_INFORMATION) GlobalAlloc(GPTR,
+//                                                             sizeof(SOCKET_INFORMATION))) == NULL)
+//        {
+//            ErrorHandler::showMessage("GlobalAlloc() failed");
+//            return FALSE;
+//        }
 
         // Fill in the details of our accepted socket.
 
-        SocketInfo->Socket = connection->getAcceptSocket();
-        ZeroMemory(&(SocketInfo->Overlapped), sizeof(WSAOVERLAPPED));
-        SocketInfo->BytesSEND = 0;
-        SocketInfo->BytesRECV = 0;
-        SocketInfo->DataBuf.len = DATA_BUFSIZE;
-        SocketInfo->DataBuf.buf = SocketInfo->Buffer;
+        connection->getSocketInfo()->Socket = connection->getAcceptSocket();
+        ZeroMemory(&(connection->getSocketInfo()->Overlapped), sizeof(WSAOVERLAPPED));
+        connection->getSocketInfo()->BytesSEND = 0;
+        connection->getSocketInfo()->BytesRECV = 0;
+        connection->getSocketInfo()->DataBuf.len = DATA_BUFSIZE;
+        connection->getSocketInfo()->DataBuf.buf = connection->getSocketInfo()->Buffer;
 
         Flags = 0;
-        if (WSARecv(SocketInfo->Socket, &(SocketInfo->DataBuf), 1, &RecvBytes, &Flags,
-                    &(SocketInfo->Overlapped), WorkerRoutine) == SOCKET_ERROR)
+        if (WSARecv(connection->getSocketInfo()->Socket, &(connection->getSocketInfo()->DataBuf), 1, &RecvBytes, &Flags,
+                    &(connection->getSocketInfo()->Overlapped), WorkerRoutine) == SOCKET_ERROR)
         {
             if (WSAGetLastError() != WSA_IO_PENDING)
             {
-                ErrorHandler::showMessage("I/O operation failed with error");
+                perror("I/O operation failed with error");
                                           return FALSE;
             }
         }
