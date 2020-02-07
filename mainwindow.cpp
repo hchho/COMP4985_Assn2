@@ -176,16 +176,16 @@ DWORD WINAPI MainWindow::UIThread(void* param) {
     char* buf = (char*)malloc(DATA_BUFSIZE);
     memset(buf, 0, DATA_BUFSIZE);
     int packetCount = 0;
+    int prevSize = 0;
     while(TRUE) {
         buf = socketInfo->Buffer;
         int sizeOfBuffer = std::strlen(buf);
         if (sizeOfBuffer > 0) {
             char c[10];
 
-            QString prevValue = ui->packetsReceivedOutput->text();
-            int prevSize = prevValue.toInt();
             itoa(prevSize + sizeOfBuffer, c, 10);
             std::string rawInput{c};
+            prevSize += sizeOfBuffer;
             QString input = QString::fromStdString(rawInput);
 
             ui->packetsReceivedOutput->setText(QString::number(++packetCount));

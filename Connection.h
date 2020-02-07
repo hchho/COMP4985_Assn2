@@ -23,10 +23,8 @@ public:
     Connection() = default;
     Connection(SOCKET s, struct sockaddr_in* ss) : sd(s) {
         buf = new char[DATA_BUFSIZE];
-        client = (struct sockaddr_in*)malloc(sizeof(*client));
         server = (struct sockaddr_in*)malloc(sizeof(*server));
 
-        client_len = sizeof(*client);
         server_len = sizeof(*server);
 
         memcpy(server, ss, sizeof(*server));
@@ -39,7 +37,6 @@ public:
     }
     virtual ~Connection() {
         delete[] buf;
-        delete client;
         delete server;
     }
     virtual void initClientConnection() = 0;

@@ -82,14 +82,13 @@ void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
     SI->DataBuf.len = DATA_BUFSIZE;
     SI->DataBuf.buf = SI->Buffer;
 
-    // SI->DataBuf has the content
     if (WSARecvFrom(SI->Socket, &(SI->DataBuf), 1, &RecvBytes, &Flags,
                     (struct sockaddr*)client, &client_len,
                     &(SI->Overlapped), UDPWorkerRoutine) == SOCKET_ERROR)
     {
         if (WSAGetLastError() != WSA_IO_PENDING )
         {
-            ErrorHandler::showMessage("WSARecv() failed with error %d\n");
+            perror("WSARecv() failed with error %d\n");
             return;
         }
     }
