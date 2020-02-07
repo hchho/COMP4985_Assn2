@@ -10,12 +10,12 @@ void CALLBACK TCPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
 
     if (Error != 0)
     {
-        ErrorHandler::showMessage("I/O operation failed with error");
+        perror("I/O operation failed with error");
     }
 
     if (BytesTransferred == 0)
     {
-        ErrorHandler::showMessage("Closing socket");
+        perror("Closing socket");
     }
 
     if (Error != 0 || BytesTransferred == 0)
@@ -59,12 +59,12 @@ void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
 
     if (Error != 0)
     {
-        ErrorHandler::showMessage("I/O operation failed with error");
+        perror("I/O operation failed with error");
     }
 
     if (BytesTransferred == 0)
     {
-        ErrorHandler::showMessage("Closing socket");
+        perror("Closing socket");
     }
 
     if (Error != 0 || BytesTransferred == 0)
