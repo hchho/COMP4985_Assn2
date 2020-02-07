@@ -185,7 +185,7 @@ DWORD WINAPI MainWindow::UIThread(void* param) {
             QString input = QString::fromStdString(rawInput);
 
             ui->packetsReceivedOutput->setText(QString::number(++packetCount));
-            ui->bytesSentOutput->setText(input);
+            ui->bytesReceivedOutput->setText(input);
         }
         memset(buf, 0, DATA_BUFSIZE);
     }
