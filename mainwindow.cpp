@@ -15,7 +15,6 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-
 void MainWindow::on_actionTCP_triggered()
 {
     ui->actionUDP->setChecked(false);
