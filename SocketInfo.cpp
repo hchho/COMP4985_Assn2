@@ -27,14 +27,13 @@ void CALLBACK WorkerRoutine(DWORD Error, DWORD BytesTransferred,
 
     SI->BytesRECV = 0;
 
-    // Now that there are no more bytes to send post another WSARecv() request.
-
     Flags = 0;
     ZeroMemory(&(SI->Overlapped), sizeof(WSAOVERLAPPED));
 
     SI->DataBuf.len = DATA_BUFSIZE;
     SI->DataBuf.buf = SI->Buffer;
 
+    // SI->DataBuf has the content
     if (WSARecv(SI->Socket, &(SI->DataBuf), 1, &RecvBytes, &Flags,
                 &(SI->Overlapped), WorkerRoutine) == SOCKET_ERROR)
     {

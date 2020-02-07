@@ -61,6 +61,12 @@ public:
     SOCKET getAcceptSocket() const {
         return AcceptSocket;
     }
+    SOCKET getListenSocket() const {
+        return sd;
+    }
+    void setAcceptSocket(const SOCKET s) {
+        AcceptSocket = s;
+    }
     static DWORD WINAPI WorkerThread(LPVOID lpParameter);
 };
 

@@ -22,35 +22,6 @@ void TCPConnection::startRoutine() {
         exit(1);
     }
 
-    if ((AcceptSocket = accept (sd, NULL, NULL)) == -1) {
-        ErrorHandler::showMessage("Can't accept client");
-        exit(1);
-    }
-
-    if (WSASetEvent(AcceptEvent) == FALSE)
-    {
-        ErrorHandler::showMessage("WSASetEvent failed");
-        exit(1);
-    }
-
-
-    // THE SECTION BELOW DOES NOT IMPLEMENT OVERLAP STRUCTURE
-    //    if ((new_sd = accept (sd, (struct sockaddr *)client, &client_len)) == -1)
-    //    {
-    //        ErrorHandler::showMessage("Can't accept client");
-    //        exit(1);
-    //    }
-
-    //    bp = buf;
-    //    bytes_to_read = BUFSIZE;
-
-    //    while ((n = recv (new_sd, bp, bytes_to_read, 0)) < BUFSIZE)
-    //    {
-    //        bp += n;
-    //        bytes_to_read -= n;
-    //        if (n == 0)
-    //            break;
-    //    }
     //    closesocket(new_sd);
     return;
 }
@@ -61,9 +32,22 @@ DWORD WINAPI TCPConnection::WorkerThread(LPVOID lpParameter) {
     WSAEVENT EventArray[1];
     DWORD Index;
     DWORD RecvBytes;
-
+    SOCKET accept_socket;
     // Save the accept event in the event array.
     TCPConnection *connection = (TCPConnection*) lpParameter;
+
+    if ((accept_socket = accept (connection->getListenSocket(), NULL, NULL)) == -1) {
+        ErrorHandler::showMessage("Can't accept client");
+        exit(1);
+    }
+
+    connection->setAcceptSocket(accept_socket);
+
+    if (WSASetEvent(connection->getAcceptEvent()) == FALSE)
+    {
+        ErrorHandler::showMessage("WSASetEvent failed");
+        exit(1);
+    }
 
     EventArray[0] = connection->getAcceptEvent();
 
