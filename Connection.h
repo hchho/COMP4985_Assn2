@@ -8,7 +8,6 @@
 #include "ErrorHandler.h"
 #include "SocketInfo.h"
 
-#define MAXLEN  60000
 
 class Connection {
 protected:
@@ -23,7 +22,7 @@ protected:
 public:
     Connection() = default;
     Connection(SOCKET s, struct sockaddr_in* ss) : sd(s) {
-        buf = new char[MAXLEN];
+        buf = new char[DATA_BUFSIZE];
         client = (struct sockaddr_in*)malloc(sizeof(*client));
         server = (struct sockaddr_in*)malloc(sizeof(*server));
 
@@ -66,7 +65,7 @@ public:
 
 class TCPConnection : public Connection {
 private:
-    static int constexpr BUFSIZE = MAXLEN;
+    static int constexpr BUFSIZE = DATA_BUFSIZE;
     SOCKET AcceptSocket;
 public:
     TCPConnection() = default;
