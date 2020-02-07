@@ -1,6 +1,12 @@
+#define _CRT_SECURE_NO_WARNINGS
+
+#include <string>
+#include <stdlib.h>
+#include <stdio.h>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "ErrorHandler.h"
+#include "SocketInfo.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -110,8 +116,18 @@ DWORD WINAPI MainWindow::UIThread(void* param) {
     Ui::MainWindow *ui = window->getUI();
     Connection* connection = (Connection*)window->getConnection();
     LPSOCKET_INFORMATION socketInfo = connection->getSocketInfo();
+    char* buf = (char*)malloc(DATA_BUFSIZE);
+    memset(buf, 0, DATA_BUFSIZE);
     while(TRUE) {
-        ui->packetsReceivedOutput->setText(socketInfo->Buffer);
+        buf = socketInfo->Buffer;
+        int sizeOfBuffer = std::strlen(buf);
+        if (sizeOfBuffer > 0) {
+            char c[10];
+            itoa(sizeOfBuffer, c, 10);
+            std::string rawInput{c};
+            QString input = QString::fromStdString(rawInput);
+            ui->packetsReceivedOutput->setText(input);
+        }
     }
     return TRUE;
 }
