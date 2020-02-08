@@ -54,9 +54,6 @@ void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
     struct sockaddr_in *client;
     LPSOCKET_INFORMATION SI = (LPSOCKET_INFORMATION) Overlapped;
 
-    client = (struct sockaddr_in*)malloc(sizeof(*client));
-    client_len = sizeof(*client);
-
     if (Error != 0)
     {
         perror("I/O operation failed with error");
@@ -70,7 +67,9 @@ void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
     if (Error != 0 || BytesTransferred == 0)
     {
         closesocket(SI->Socket);
-        GlobalFree(SI);
+        if (SI != nullptr) {
+            GlobalFree(SI);
+        }
         return;
     }
 
@@ -89,6 +88,7 @@ void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
         if (WSAGetLastError() != WSA_IO_PENDING )
         {
             perror("WSARecv() failed with error %d\n");
+            int error = WSAGetLastError();
             return;
         }
     }

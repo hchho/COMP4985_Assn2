@@ -2,6 +2,11 @@
 
 int TCPConnection::sendToServer(const char* data) {
     return send(sd, data, BUFSIZE, 0);
+//    SocketInfo->Socket = sd;
+//    SocketInfo->DataBuf.buf = const_cast<char*>(data);
+//    SocketInfo->DataBuf.len = DATA_BUFSIZE;
+//    ZeroMemory(&(SocketInfo->Overlapped), sizeof(WSAOVERLAPPED));
+//    return WSASend(sd, &(SocketInfo->DataBuf), DATA_BUFSIZE, &(SocketInfo->BytesSEND), 0, &(SocketInfo->Overlapped), TCPWorkerRoutine);
 }
 
 void TCPConnection::startRoutine() {
@@ -85,7 +90,7 @@ DWORD WINAPI TCPConnection::WorkerThread(LPVOID lpParameter) {
             if (WSAGetLastError() != WSA_IO_PENDING)
             {
                 perror("I/O operation failed with error");
-                                          return FALSE;
+                return FALSE;
             }
         }
     }
@@ -122,12 +127,17 @@ void UDPConnection::initClientConnection() {
 }
 
 DWORD WINAPI UDPConnection::WorkerThread(LPVOID lpParameter) {
+    int client_len;
+    struct sockaddr_in *client;
     DWORD Flags;
     WSAEVENT EventArray[1];
     DWORD Index;
     DWORD RecvBytes;
 
     UDPConnection *connection = (UDPConnection*) lpParameter;
+
+    client = (struct sockaddr_in*)malloc(sizeof(*client));
+    client_len = sizeof(*client);
 
     connection->setAcceptEvent(WSACreateEvent());
 
@@ -136,7 +146,7 @@ DWORD WINAPI UDPConnection::WorkerThread(LPVOID lpParameter) {
         return FALSE;
     }
 
-    if (WSAEventSelect(connection->getListenSocket(), connection->getAcceptEvent(), FD_CLOSE | FD_READ) == SOCKET_ERROR) {
+    if (WSAEventSelect(connection->getListenSocket(), connection->getAcceptEvent(), FD_CLOSE | FD_READ | FD_OOB) == SOCKET_ERROR) {
         perror("Error listening to socket event");
         return FALSE;
     }
@@ -145,7 +155,6 @@ DWORD WINAPI UDPConnection::WorkerThread(LPVOID lpParameter) {
 
     while(TRUE)
     {
-        // Wait for accept() to signal an event and also process WorkerRoutine() returns.
 
         while(TRUE)
         {
@@ -168,7 +177,7 @@ DWORD WINAPI UDPConnection::WorkerThread(LPVOID lpParameter) {
 
         // Fill in the details of our accepted socket.
 
-        connection->getSocketInfo()->Socket = connection->getListenSocket(); // NOTE: This socket is different than the one set in TCP
+        connection->getSocketInfo()->Socket = connection->getListenSocket();
         ZeroMemory(&(connection->getSocketInfo()->Overlapped), sizeof(WSAOVERLAPPED));
         connection->getSocketInfo()->BytesSEND = 0;
         connection->getSocketInfo()->BytesRECV = 0;
@@ -176,16 +185,16 @@ DWORD WINAPI UDPConnection::WorkerThread(LPVOID lpParameter) {
         connection->getSocketInfo()->DataBuf.buf = connection->getSocketInfo()->Buffer;
 
         Flags = 0;
-        if (WSARecv(connection->getSocketInfo()->Socket, &(connection->getSocketInfo()->DataBuf), 1, &RecvBytes, &Flags,
-                    &(connection->getSocketInfo()->Overlapped), UDPWorkerRoutine) == SOCKET_ERROR)
+        if (WSARecvFrom(connection->getSocketInfo()->Socket, &(connection->getSocketInfo()->DataBuf), 1, &RecvBytes, &Flags,
+                    (struct sockaddr*)client, &client_len, &(connection->getSocketInfo()->Overlapped), UDPWorkerRoutine) == SOCKET_ERROR)
         {
             if (WSAGetLastError() != WSA_IO_PENDING)
             {
                 perror("I/O operation failed with error");
-                                          return FALSE;
+                delete client;
+                return FALSE;
             }
         }
     }
-
     return TRUE;
 }

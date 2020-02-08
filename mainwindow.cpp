@@ -157,7 +157,7 @@ DWORD WINAPI MainWindow::SendThread(void* param) {
     memset(output, 'a', packetSize);
 
     for(int i = 0; i < count; i++) {
-        if (connection->sendToServer(output) == -1) {
+        if (connection->sendToServer(output) == SOCKET_ERROR) {
             perror("Error sending");
             return FALSE;
         }
@@ -176,21 +176,24 @@ DWORD WINAPI MainWindow::UIThread(void* param) {
     char* buf = (char*)malloc(DATA_BUFSIZE);
     memset(buf, 0, DATA_BUFSIZE);
     int packetCount = 0;
-    int prevSize = 0;
+    long prevSize = 0;
+    int index;
     while(TRUE) {
+        char c[10];
+        WaitForSingleObject(connection->getAcceptEvent(), INFINITE);
+
         buf = socketInfo->Buffer;
-        int sizeOfBuffer = std::strlen(buf);
-        if (sizeOfBuffer > 0) {
-            char c[10];
+        long sizeOfBuffer = std::strlen(buf);
 
-            itoa(prevSize + sizeOfBuffer, c, 10);
-            std::string rawInput{c};
-            prevSize += sizeOfBuffer;
-            QString input = QString::fromStdString(rawInput);
+        prevSize += sizeOfBuffer;
 
-            ui->packetsReceivedOutput->setText(QString::number(++packetCount));
-            ui->bytesReceivedOutput->setText(input);
-        }
+        itoa(prevSize, c, 10);
+        std::string rawInput{c};
+        QString input = QString::fromStdString(rawInput);
+
+        ui->packetsReceivedOutput->setText(QString::number(++packetCount));
+        ui->bytesReceivedOutput->setText(input);
+
         memset(buf, 0, DATA_BUFSIZE);
     }
     return TRUE;
