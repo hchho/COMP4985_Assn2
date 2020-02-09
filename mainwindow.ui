@@ -60,11 +60,22 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="receiveBtn">
-       <property name="text">
-        <string>Begin Receiving</string>
-       </property>
-      </widget>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QPushButton" name="receiveBtn">
+         <property name="text">
+          <string>Begin Receiving</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="saveInputBox">
+         <property name="text">
+          <string>Save Input to File</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item>
       <layout class="QHBoxLayout" name="sendBar">
@@ -232,7 +243,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>30</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuConnect">
