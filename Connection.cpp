@@ -29,6 +29,11 @@ int TCPConnection::sendToServer(const char* data) {
     return TRUE;
 }
 
+int TCPConnection::sendFileToServer(const char *filePath) {
+
+    return TRUE;
+}
+
 void TCPConnection::startRoutine(unsigned long packetSize) {
     listen(sd, 1);
 
@@ -156,6 +161,12 @@ int UDPConnection::sendToServer(const char* data) {
     }
     return TRUE;
 }
+
+int UDPConnection::sendFileToServer(const char *filePath) {
+
+    return TRUE;
+}
+
 
 void UDPConnection::startRoutine(unsigned long packetSize) {
 

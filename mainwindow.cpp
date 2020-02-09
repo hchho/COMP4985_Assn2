@@ -1,5 +1,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 
+#include <QFileDialog>
+#include <QDir>
 #include <string>
 #include <stdlib.h>
 #include <stdio.h>
@@ -181,4 +183,10 @@ DWORD WINAPI MainWindow::UIThread(void* param) {
         ui->bytesReceivedOutput->setText(QString::number(socketInfo->TotalBytesRecv));
     }
     return TRUE;
+}
+
+void MainWindow::on_sendFileBtn_clicked()
+{
+    QString filePath = QFileDialog::getOpenFileName(this, "Open a file", "", "Text files (*.txt)");
+    return;
 }

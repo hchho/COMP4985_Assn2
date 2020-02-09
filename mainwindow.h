@@ -1,3 +1,4 @@
+void on_sendFileBtn_clicked();
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
@@ -42,6 +43,8 @@ private slots:
     void on_connectBtn_clicked();
 
     void on_sendPacketBtn_clicked();
+
+    void on_sendFileBtn_clicked();
 
     void on_receiveBtn_clicked();
 
