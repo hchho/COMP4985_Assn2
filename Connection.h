@@ -47,6 +47,7 @@ public:
         CloseHandle(ServerThreadHandle);
     }
     virtual void stop() {
+        closesocket(sd);
         WSACleanup();
     }
     SOCKET getListenSocket() const {
@@ -76,6 +77,10 @@ public:
     int sendToServer(const char* data) override;
     void initClientConnection() override;
     void startRoutine(unsigned long) override;
+    void stop() override {
+        closesocket(AcceptSocket);
+        Connection::stop();
+    };
     SOCKET getAcceptSocket() const {
         return AcceptSocket;
     }
