@@ -180,7 +180,7 @@ DWORD WINAPI MainWindow::UIThread(void* param) {
     LPSOCKET_INFORMATION socketInfo = connection->getSocketInfo();
     bool isSavedToFile = ui->saveInputBox->isChecked();
     int lastBytesReceived = 0;
-    while(TRUE) {
+    while(socketInfo->Error == 0) {
         ui->packetsReceivedOutput->setText(QString::number(socketInfo->packetCount));
         ui->bytesReceivedOutput->setText(QString::number(socketInfo->TotalBytesRecv));
         if (socketInfo->TotalBytesRecv > lastBytesReceived) {
@@ -189,7 +189,7 @@ DWORD WINAPI MainWindow::UIThread(void* param) {
                 writeToFile(socketInfo->Buffer);
         }
     }
-    return TRUE;
+    return FALSE;
 }
 
 void writeToFile(const char* data) {

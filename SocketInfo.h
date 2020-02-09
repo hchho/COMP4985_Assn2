@@ -13,6 +13,7 @@ typedef struct _SOCKET_INFORMATION {
    DWORD BytesSEND;
    DWORD BytesRECV;
    DWORD Flags;
+   DWORD Error = 0;
    unsigned int packetCount = 0;
    unsigned long TotalBytesRecv = 0;
    unsigned long TotalBytesSend = 0;

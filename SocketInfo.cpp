@@ -20,7 +20,10 @@ void CALLBACK TCPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
     if (Error != 0 || BytesTransferred == 0)
     {
         closesocket(SI->Socket);
-        GlobalFree(SI);
+        if (SI != nullptr) {
+            GlobalFree(SI);
+        }
+        SI->Error = Error || TRUE;
         return;
     }
 
@@ -67,6 +70,7 @@ void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
         if (SI != nullptr) {
             GlobalFree(SI);
         }
+        SI->Error = Error || TRUE;
         return;
     }
 
