@@ -173,28 +173,9 @@ DWORD WINAPI MainWindow::UIThread(void* param) {
     Connection* connection = (Connection*)window->getConnection();
     LPSOCKET_INFORMATION socketInfo = connection->getSocketInfo();
 
-    char* buf = (char*)malloc(DATA_BUFSIZE);
-    memset(buf, 0, DATA_BUFSIZE);
-    int packetCount = 0;
-    long prevSize = 0;
-    int index;
     while(TRUE) {
-        char c[10];
-        WaitForSingleObject(connection->getAcceptEvent(), INFINITE);
-
-        buf = socketInfo->Buffer;
-        long sizeOfBuffer = std::strlen(buf);
-
-        prevSize += sizeOfBuffer;
-
-        itoa(prevSize, c, 10);
-        std::string rawInput{c};
-        QString input = QString::fromStdString(rawInput);
-
-        ui->packetsReceivedOutput->setText(QString::number(++packetCount));
-        ui->bytesReceivedOutput->setText(input);
-
-        memset(buf, 0, DATA_BUFSIZE);
+        ui->packetsReceivedOutput->setText(QString::number(socketInfo->packetCount));
+        ui->bytesReceivedOutput->setText(QString::number(socketInfo->TotalBytesRecv));
     }
     return TRUE;
 }

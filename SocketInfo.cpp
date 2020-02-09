@@ -4,7 +4,6 @@
 void CALLBACK TCPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
                                LPWSAOVERLAPPED Overlapped, DWORD InFlags) {
     // Reference the WSAOVERLAPPED structure as a SOCKET_INFORMATION structure
-    DWORD RecvBytes;
     DWORD Flags;
     LPSOCKET_INFORMATION SI = (LPSOCKET_INFORMATION) Overlapped;
 
@@ -25,16 +24,9 @@ void CALLBACK TCPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
         return;
     }
 
-    SI->BytesRECV = 0;
-
     Flags = 0;
-    ZeroMemory(&(SI->Overlapped), sizeof(WSAOVERLAPPED));
 
-    SI->DataBuf.len = DATA_BUFSIZE;
-    SI->DataBuf.buf = SI->Buffer;
-
-    // SI->DataBuf has the content
-    if (WSARecv(SI->Socket, &(SI->DataBuf), 1, &RecvBytes, &Flags,
+    if (WSARecv(SI->Socket, &(SI->DataBuf), 1, &SI->BytesRECV, &Flags,
                 &(SI->Overlapped), TCPWorkerRoutine) == SOCKET_ERROR)
     {
         if (WSAGetLastError() != WSA_IO_PENDING )
@@ -43,12 +35,15 @@ void CALLBACK TCPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
             return;
         }
     }
+    if (BytesTransferred > 0) {
+        SI->packetCount++;
+        SI->TotalBytesRecv += BytesTransferred;
+    }
 }
 
 void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
                                LPWSAOVERLAPPED Overlapped, DWORD InFlags) {
     // Reference the WSAOVERLAPPED structure as a SOCKET_INFORMATION structure
-    DWORD RecvBytes;
     DWORD Flags;
     int client_len;
     struct sockaddr_in *client;
@@ -73,15 +68,9 @@ void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
         return;
     }
 
-    SI->BytesRECV = 0;
-
     Flags = 0;
-    ZeroMemory(&(SI->Overlapped), sizeof(WSAOVERLAPPED));
 
-    SI->DataBuf.len = DATA_BUFSIZE;
-    SI->DataBuf.buf = SI->Buffer;
-
-    if (WSARecvFrom(SI->Socket, &(SI->DataBuf), 1, &RecvBytes, &Flags,
+    if (WSARecvFrom(SI->Socket, &(SI->DataBuf), 1, &SI->BytesRECV, &Flags,
                     (struct sockaddr*)client, &client_len,
                     &(SI->Overlapped), UDPWorkerRoutine) == SOCKET_ERROR)
     {

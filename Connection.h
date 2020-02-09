@@ -14,6 +14,7 @@ protected:
     HANDLE ServerThreadHandle;
     DWORD ServerThreadId;
     WSAEVENT AcceptEvent;
+    WSAEVENT ReceivedEvent;
     LPSOCKET_INFORMATION SocketInfo;
     SOCKET sd;
     char *buf;
@@ -54,8 +55,11 @@ public:
     WSAEVENT getAcceptEvent() const {
         return AcceptEvent;
     }
-    void setAcceptEvent(const WSAEVENT e) {
-        AcceptEvent = e;
+    void setReceivedEvent(const WSAEVENT e) {
+        ReceivedEvent = e;
+    }
+    WSAEVENT getReceivedEvent() const {
+        return ReceivedEvent;
     }
     LPSOCKET_INFORMATION getSocketInfo() {
         return SocketInfo;

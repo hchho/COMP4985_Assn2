@@ -12,6 +12,8 @@ typedef struct _SOCKET_INFORMATION {
    WSABUF DataBuf;
    DWORD BytesSEND;
    DWORD BytesRECV;
+   unsigned int packetCount = 0;
+   unsigned long TotalBytesRecv = 0;
 } SOCKET_INFORMATION, * LPSOCKET_INFORMATION;
 
 void CALLBACK TCPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
