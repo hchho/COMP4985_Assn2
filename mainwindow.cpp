@@ -110,6 +110,7 @@ void MainWindow::on_sendPacketBtn_clicked()
         if(WaitForSingleObject(sendThreadHandle, INFINITE)) {
             ErrorHandler::showMessage("Error sending packets");
         }
+        CloseHandle(sendThreadHandle);
         ui->sendPacketBtn->setText("Send Packet");
         delete sendInfo;
     }
@@ -188,5 +189,6 @@ DWORD WINAPI MainWindow::UIThread(void* param) {
 void MainWindow::on_sendFileBtn_clicked()
 {
     QString filePath = QFileDialog::getOpenFileName(this, "Open a file", "", "Text files (*.txt)");
+    currConnection->sendFileToServer(filePath.toStdString().c_str());
     return;
 }

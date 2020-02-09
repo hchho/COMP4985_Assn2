@@ -4,6 +4,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string>
+#include <fstream>
 #include <WinSock2.h>
 #include "ErrorHandler.h"
 #include "SocketInfo.h"
@@ -42,7 +43,7 @@ public:
     }
     virtual void initClientConnection() = 0;
     virtual int sendToServer(const char* data) = 0;
-    virtual int sendFileToServer(const char* filePath) = 0;
+    virtual int sendFileToServer(const char* filePath);
     virtual void startRoutine(unsigned long) = 0;
     void stopRoutine() {
         CloseHandle(ServerThreadHandle);

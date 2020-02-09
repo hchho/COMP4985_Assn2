@@ -1,5 +1,29 @@
 #include "Connection.h"
 
+int Connection::sendFileToServer(const char *filePath) {
+    std::streampos begin,end;
+    unsigned long size;
+    char* buf;
+
+    std::ifstream fileToSend(filePath);
+
+    begin = fileToSend.tellg();
+    fileToSend.seekg(0, std::ios::end);
+    end = fileToSend.tellg();
+
+    size = end - begin;
+    buf = new char[size];
+    fileToSend.seekg(0, std::ios::beg);
+    fileToSend.read(buf, size);
+    fileToSend.close();
+
+    if (!sendToServer(buf)) {
+        return FALSE;
+    }
+    delete[] buf;
+    return TRUE;
+}
+
 int TCPConnection::sendToServer(const char* data) {
     int res, err;
     SocketInfo->DataBuf.buf = const_cast<char *>(data);
@@ -26,11 +50,6 @@ int TCPConnection::sendToServer(const char* data) {
     }
 
     WSAResetEvent(SocketInfo->Overlapped.hEvent);
-    return TRUE;
-}
-
-int TCPConnection::sendFileToServer(const char *filePath) {
-
     return TRUE;
 }
 
@@ -159,11 +178,6 @@ int UDPConnection::sendToServer(const char* data) {
         err = WSAGetLastError();
         return FALSE;
     }
-    return TRUE;
-}
-
-int UDPConnection::sendFileToServer(const char *filePath) {
-
     return TRUE;
 }
 
