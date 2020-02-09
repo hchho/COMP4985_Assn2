@@ -3,7 +3,7 @@
 int Connection::sendFileToServer(const char *filePath) {
     std::streampos begin,end;
     unsigned long size;
-    char* buf;
+    char* buffer;
 
     std::ifstream fileToSend(filePath);
 
@@ -12,15 +12,15 @@ int Connection::sendFileToServer(const char *filePath) {
     end = fileToSend.tellg();
 
     size = end - begin;
-    buf = new char[size];
+    buffer = new char[size];
     fileToSend.seekg(0, std::ios::beg);
-    fileToSend.read(buf, size);
+    fileToSend.read(buffer, size);
     fileToSend.close();
 
-    if (!sendToServer(buf)) {
+    if (!sendToServer(buffer)) {
         return FALSE;
     }
-    delete[] buf;
+    delete[] buffer;
     return TRUE;
 }
 

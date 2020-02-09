@@ -5,6 +5,7 @@ void on_sendFileBtn_clicked();
 #include <QMainWindow>
 #include <ConnectivityManager.h>
 #include <ConnectionType.h>
+#include <fstream>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -60,4 +61,6 @@ private:
     int getPacketSize();
     int getNumberOfTimesToSend();
 };
+
+void writeToFile(const char*);
 #endif // MAINWINDOW_H

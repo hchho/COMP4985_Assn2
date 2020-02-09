@@ -77,7 +77,6 @@ public:
     TCPConnection() = default;
     TCPConnection(SOCKET s, struct	sockaddr_in *ss) : Connection(s, ss) {}
     int sendToServer(const char* data) override;
-    int sendFileToServer(const char* filePath) override;
     void initClientConnection() override;
     void startRoutine(unsigned long) override;
     void stop() override {
@@ -98,7 +97,6 @@ public:
     UDPConnection() = default;
     UDPConnection(SOCKET s, struct	sockaddr_in *ss) : Connection(s, ss) {}
     int sendToServer(const char* data) override;
-    int sendFileToServer(const char* filePath) override;
     void startRoutine(unsigned long) override;
     void initClientConnection() override;
     static DWORD WINAPI WorkerThread(LPVOID lpParameter);

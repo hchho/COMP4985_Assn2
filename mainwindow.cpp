@@ -168,7 +168,7 @@ DWORD WINAPI MainWindow::SendThread(void* param) {
         }
         SI->TotalBytesSend += SI->BytesSEND;
         ui->bytesSentOutput->setText(QString::number(SI->TotalBytesSend));
-        ui->packetsSentOutput->setText(QString::number(i + 1));
+        ui->packetsSentOutput->setText(QString::number(SI->packetCount));
     }
     return TRUE;
 }
@@ -178,17 +178,33 @@ DWORD WINAPI MainWindow::UIThread(void* param) {
     Ui::MainWindow *ui = window->getUI();
     Connection* connection = (Connection*)window->getConnection();
     LPSOCKET_INFORMATION socketInfo = connection->getSocketInfo();
-
+    bool isSavedToFile = ui->saveInputBox->isChecked();
+    int lastBytesReceived = 0;
     while(TRUE) {
         ui->packetsReceivedOutput->setText(QString::number(socketInfo->packetCount));
         ui->bytesReceivedOutput->setText(QString::number(socketInfo->TotalBytesRecv));
+        if (socketInfo->TotalBytesRecv > lastBytesReceived) {
+            lastBytesReceived = socketInfo->TotalBytesRecv;
+            if (isSavedToFile)
+                writeToFile(socketInfo->Buffer);
+        }
     }
     return TRUE;
+}
+
+void writeToFile(const char* data) {
+    std::ofstream file;
+    file.open("output.txt");
+    file << data;
+    file.close();
 }
 
 void MainWindow::on_sendFileBtn_clicked()
 {
     QString filePath = QFileDialog::getOpenFileName(this, "Open a file", "", "Text files (*.txt)");
     currConnection->sendFileToServer(filePath.toStdString().c_str());
+    LPSOCKET_INFORMATION SI = currConnection->getSocketInfo();
+    ui->bytesSentOutput->setText(QString::number(SI->TotalBytesSend));
+    ui->packetsSentOutput->setText(QString::number(SI->packetCount));
     return;
 }
