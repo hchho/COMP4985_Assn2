@@ -101,7 +101,28 @@ void TCPConnection::initClientConnection() {
 }
 
 int UDPConnection::sendToServer(const char* data) {
-    return sendto(sd, data, std::strlen(data), 0, (struct sockaddr*)server, server_len);
+    int res, err;
+    SocketInfo->DataBuf.buf = const_cast<char *>(data);
+    SocketInfo->DataBuf.len = strlen(data);
+    res = WSASendTo(sd, &SocketInfo->DataBuf, 1, &SocketInfo->BytesSEND, 0, (struct sockaddr*)server, server_len, &SocketInfo->Overlapped, NULL);
+    if (res == SOCKET_ERROR && (WSA_IO_PENDING != WSAGetLastError())) {
+        err = WSAGetLastError();
+        return FALSE;
+    }
+    res = WSAWaitForMultipleEvents(1, &SocketInfo->Overlapped.hEvent, TRUE, INFINITE, TRUE);
+
+    if (res == WAIT_FAILED) {
+        err = WSAGetLastError();
+        return FALSE;
+    }
+
+    res = WSAGetOverlappedResult(SocketInfo->Socket, &SocketInfo->Overlapped, &SocketInfo->BytesSEND, FALSE, &SocketInfo->Flags);
+
+    if (res == FALSE) {
+        err = WSAGetLastError();
+        return FALSE;
+    }
+    return TRUE;
 }
 
 void UDPConnection::startRoutine(unsigned long packetSize) {
@@ -115,7 +136,16 @@ void UDPConnection::startRoutine(unsigned long packetSize) {
 }
 
 void UDPConnection::initClientConnection() {
-    if (setsockopt( sd, SOL_SOCKET, SO_SNDBUF, buf, sizeof(buf)) != 0) {
+    SecureZeroMemory((PVOID) &SocketInfo->Overlapped, sizeof(WSAOVERLAPPED));
+    SocketInfo->Overlapped.hEvent = WSACreateEvent();
+
+    if (SocketInfo->Overlapped.hEvent == WSA_INVALID_EVENT) {
+        ErrorHandler::showMessage("Error setting event");
+        exit(1);
+    }
+
+    SocketInfo->Socket = sd;
+    if (setsockopt( SocketInfo->Socket, SOL_SOCKET, SO_SNDBUF, buf, sizeof(buf)) != 0) {
         ErrorHandler::showMessage("Error setting socket");
         exit(1);
     }
@@ -124,7 +154,6 @@ void UDPConnection::initClientConnection() {
 DWORD WINAPI UDPConnection::WorkerThread(LPVOID lpParameter) {
     int client_len;
     struct sockaddr_in *client;
-    DWORD Flags;
     WSAEVENT EventArray[1];
     DWORD Index;
 
@@ -176,9 +205,9 @@ DWORD WINAPI UDPConnection::WorkerThread(LPVOID lpParameter) {
         SI->BytesSEND = 0;
         SI->BytesRECV = 0;
         SI->DataBuf.buf = SI->Buffer;
+        SI->Flags = 0;
 
-        Flags = 0;
-        if (WSARecvFrom(SI->Socket, &(SI->DataBuf), 1, &SI->BytesRECV, &Flags,
+        if (WSARecvFrom(SI->Socket, &(SI->DataBuf), 1, &SI->BytesRECV, &SI->Flags,
                         (struct sockaddr*)client, &client_len, &(SI->Overlapped), UDPWorkerRoutine) == SOCKET_ERROR)
         {
             if (WSAGetLastError() != WSA_IO_PENDING)
@@ -187,10 +216,6 @@ DWORD WINAPI UDPConnection::WorkerThread(LPVOID lpParameter) {
                 delete client;
                 return FALSE;
             }
-        }
-        if (SI->BytesRECV > 0) {
-            SI->packetCount++;
-            SI->TotalBytesRecv += SI->BytesRECV;
         }
     }
     return TRUE;

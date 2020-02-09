@@ -25,11 +25,10 @@ Connection* ConnectivityManager::initializeConnection(ConnectionType connectionT
         sd = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
         break;
     case ProtocolType::UDP:
-        sd = WSASocket (PF_INET, SOCK_DGRAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+        sd = WSASocket (PF_INET, SOCK_DGRAM, IPPROTO_UDP, NULL, 0, WSA_FLAG_OVERLAPPED);
         break;
     }
 
-    // Create a datagram socket
     if (sd == -1)
     {
         ErrorHandler::showMessage("Can't create a socket. Exiting...");

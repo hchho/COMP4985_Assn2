@@ -147,22 +147,24 @@ int MainWindow::getNumberOfTimesToSend() {
 }
 
 DWORD WINAPI MainWindow::SendThread(void* param) {
+    int res, err;
     SEND_INFO* sendInfo = (SEND_INFO*) param;
 
     Connection* connection = sendInfo->connection;
+    LPSOCKET_INFORMATION SI = connection->getSocketInfo();
     Ui::MainWindow *ui = sendInfo->ui;
     int packetSize = sendInfo->packetSize;
     int count = sendInfo->numberOfTimesToSend;
 
     char* output = (char*)malloc(packetSize);
     memset(output, 'a', packetSize);
-
+    SI->TotalBytesSend = 0;
     for(int i = 0; i < count; i++) {
-        if (connection->sendToServer(output) == SOCKET_ERROR) {
-            perror("Error sending");
+        if (connection->sendToServer(output) == FALSE) {
             return FALSE;
         }
-        ui->bytesSentOutput->setText(QString::number(packetSize * (i+ 1)));
+        SI->TotalBytesSend += SI->BytesSEND;
+        ui->bytesSentOutput->setText(QString::number(SI->TotalBytesSend));
         ui->packetsSentOutput->setText(QString::number(i + 1));
     }
     return TRUE;
