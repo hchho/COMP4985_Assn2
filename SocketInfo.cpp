@@ -44,7 +44,6 @@ void CALLBACK TCPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
 void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
                                LPWSAOVERLAPPED Overlapped, DWORD InFlags) {
     // Reference the WSAOVERLAPPED structure as a SOCKET_INFORMATION structure
-    DWORD Flags;
     int client_len;
     struct sockaddr_in *client;
     LPSOCKET_INFORMATION SI = (LPSOCKET_INFORMATION) Overlapped;
@@ -71,9 +70,7 @@ void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
         return;
     }
 
-    Flags = 0;
-
-    if (WSARecvFrom(SI->Socket, &(SI->DataBuf), 1, &SI->BytesRECV, &Flags,
+    if (WSARecvFrom(SI->Socket, &(SI->DataBuf), 1, &SI->BytesRECV, &SI->Flags,
                     (struct sockaddr*)client, &client_len,
                     &(SI->Overlapped), UDPWorkerRoutine) == SOCKET_ERROR)
     {

@@ -126,6 +126,8 @@ int UDPConnection::sendToServer(const char* data) {
 }
 
 void UDPConnection::startRoutine(unsigned long packetSize) {
+
+    // packetSize must be large enough to hold all the data coming in.
     SocketInfo->DataBuf.len = packetSize;
     if ((ServerThreadHandle = CreateThread(NULL, 0, WorkerThread, (LPVOID) this, 0, &ServerThreadId)) == NULL)
     {
