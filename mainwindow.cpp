@@ -117,7 +117,8 @@ void MainWindow::on_receiveBtn_clicked()
 {
     isReceiving = !isReceiving;
     if (isReceiving) {
-        currConnection->startRoutine();
+        int packetSize = getPacketSize();
+        currConnection->startRoutine(packetSize);
         ui->receiveBtn->setText("Stop receiving");
         if ((UIThreadHandle = CreateThread(NULL, 0, UIThread, (LPVOID) this, 0, &UIThreadId)) == NULL)
         {

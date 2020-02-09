@@ -2,14 +2,9 @@
 
 int TCPConnection::sendToServer(const char* data) {
     return send(sd, data, strlen(data), 0);
-    //    SocketInfo->Socket = sd;
-    //    SocketInfo->DataBuf.buf = const_cast<char*>(data);
-    //    SocketInfo->DataBuf.len = DATA_BUFSIZE;
-    //    ZeroMemory(&(SocketInfo->Overlapped), sizeof(WSAOVERLAPPED));
-    //    return WSASend(sd, &(SocketInfo->DataBuf), DATA_BUFSIZE, &(SocketInfo->BytesSEND), 0, &(SocketInfo->Overlapped), TCPWorkerRoutine);
 }
 
-void TCPConnection::startRoutine() {
+void TCPConnection::startRoutine(unsigned long packetSize) {
     listen(sd, 1);
 
     if ((AcceptEvent = WSACreateEvent()) == WSA_INVALID_EVENT)
@@ -18,6 +13,7 @@ void TCPConnection::startRoutine() {
         exit(1);
     }
 
+    SocketInfo->DataBuf.len = packetSize;
     if ((ServerThreadHandle = CreateThread(NULL, 0, WorkerThread, (LPVOID) this, 0, &ServerThreadId)) == NULL)
     {
         ErrorHandler::showMessage("Error creating thread");
@@ -80,8 +76,7 @@ DWORD WINAPI TCPConnection::WorkerThread(LPVOID lpParameter) {
         ZeroMemory(&(SI->Overlapped), sizeof(WSAOVERLAPPED));
         SI->BytesSEND = 0;
         SI->BytesRECV = 0;
-        SI->DataBuf.len = DATA_BUFSIZE;
-        SI->DataBuf.buf = connection->getSocketInfo()->Buffer;
+        SI->DataBuf.buf = SI->Buffer;
 
         Flags = 0;
         if (WSARecv(SI->Socket, &(SI->DataBuf), 1, &SI->BytesRECV, &Flags,
@@ -109,7 +104,8 @@ int UDPConnection::sendToServer(const char* data) {
     return sendto(sd, data, std::strlen(data), 0, (struct sockaddr*)server, server_len);
 }
 
-void UDPConnection::startRoutine() {
+void UDPConnection::startRoutine(unsigned long packetSize) {
+    SocketInfo->DataBuf.len = packetSize;
     if ((ServerThreadHandle = CreateThread(NULL, 0, WorkerThread, (LPVOID) this, 0, &ServerThreadId)) == NULL)
     {
         ErrorHandler::showMessage("Error creating thread");
@@ -179,7 +175,6 @@ DWORD WINAPI UDPConnection::WorkerThread(LPVOID lpParameter) {
         ZeroMemory(&(SI->Overlapped), sizeof(WSAOVERLAPPED));
         SI->BytesSEND = 0;
         SI->BytesRECV = 0;
-        SI->DataBuf.len = DATA_BUFSIZE;
         SI->DataBuf.buf = SI->Buffer;
 
         Flags = 0;
