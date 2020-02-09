@@ -1,7 +1,32 @@
 #include "Connection.h"
 
 int TCPConnection::sendToServer(const char* data) {
-    return send(sd, data, strlen(data), 0);
+    int res, err;
+    SocketInfo->DataBuf.buf = const_cast<char *>(data);
+    SocketInfo->DataBuf.len = strlen(data);
+    res = WSASend(sd, &SocketInfo->DataBuf, 1, &SocketInfo->BytesSEND, 0, &SocketInfo->Overlapped, NULL);
+
+    if (res == SOCKET_ERROR && (WSA_IO_PENDING != WSAGetLastError())) {
+        err = WSAGetLastError();
+        return FALSE;
+    }
+
+    res = WSAWaitForMultipleEvents(1, &SocketInfo->Overlapped.hEvent, TRUE, INFINITE, TRUE);
+
+    if (res == WAIT_FAILED) {
+        err = WSAGetLastError();
+        return FALSE;
+    }
+
+    res = WSAGetOverlappedResult(sd, &SocketInfo->Overlapped, &SocketInfo->BytesSEND, FALSE, &SocketInfo->Flags);
+
+    if (res == FALSE) {
+        err = WSAGetLastError();
+        return FALSE;
+    }
+
+    WSAResetEvent(SocketInfo->Overlapped.hEvent);
+    return TRUE;
 }
 
 void TCPConnection::startRoutine(unsigned long packetSize) {
@@ -73,7 +98,6 @@ DWORD WINAPI TCPConnection::WorkerThread(LPVOID lpParameter) {
         // Fill in the details of our accepted socket.
 
         SI->Socket = connection->getAcceptSocket();
-        ZeroMemory(&(SI->Overlapped), sizeof(WSAOVERLAPPED));
         SI->BytesSEND = 0;
         SI->BytesRECV = 0;
         SI->DataBuf.buf = SI->Buffer;
@@ -96,6 +120,14 @@ void TCPConnection::initClientConnection() {
     if (connect (sd, (struct sockaddr *)server, server_len) == -1)
     {
         ErrorHandler::showMessage("Error creating event");
+        exit(1);
+    }
+
+    SecureZeroMemory((PVOID) &SocketInfo->Overlapped, sizeof(WSAOVERLAPPED));
+    SocketInfo->Overlapped.hEvent = WSACreateEvent();
+
+    if (SocketInfo->Overlapped.hEvent == WSA_INVALID_EVENT) {
+        ErrorHandler::showMessage("Error setting event");
         exit(1);
     }
 }

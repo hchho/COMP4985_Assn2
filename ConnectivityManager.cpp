@@ -22,7 +22,7 @@ Connection* ConnectivityManager::initializeConnection(ConnectionType connectionT
 
     switch(protocol) {
     case ProtocolType::TCP:
-        sd = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+        sd = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
         break;
     case ProtocolType::UDP:
         sd = WSASocket (PF_INET, SOCK_DGRAM, IPPROTO_UDP, NULL, 0, WSA_FLAG_OVERLAPPED);
