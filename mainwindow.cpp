@@ -230,16 +230,21 @@ DWORD WINAPI MainWindow::TimerThread(void* param) {
     LPSOCKET_INFORMATION socketInfo = connection->getSocketInfo();
 
     SYSTEMTIME stStartTime, stEndTime;
-    GetSystemTime(&stStartTime);
+
     GetSystemTime(&stEndTime);
     window->setTimeElapsedOutput(0);
-
+    int bytesReceived = socketInfo->TotalBytesRecv;
     while(TRUE) {
         if ((res = WaitForSingleObject(window->getUIThreadHandle(), 1)) > 0) {
             if (res == WAIT_TIMEOUT) {
-                if (socketInfo->TotalBytesRecv > 0)
+                if (socketInfo->TotalBytesRecv > 0) {
+                    if (bytesReceived == 0) {
+                            GetSystemTime(&stStartTime);
+                    }
                     GetSystemTime(&stEndTime);
                     window->setTimeElapsedOutput(delay(stStartTime, stEndTime));
+                    bytesReceived = socketInfo->TotalBytesRecv;
+                }
                 continue;
             }
             else {
