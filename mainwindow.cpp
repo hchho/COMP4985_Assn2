@@ -205,21 +205,20 @@ DWORD WINAPI MainWindow::SendThread(void* param) {
 }
 
 DWORD WINAPI MainWindow::UIThread(void* param) {
+    long bytesReceived;
+    unsigned int packetsReceived;
     MainWindow* window = (MainWindow*) param;
     Connection* connection = (Connection*)window->getConnection();
     LPSOCKET_INFORMATION socketInfo = connection->getSocketInfo();
     bool isSavedToFile = window->getIsSavedInputBoxChecked();
     int lastBytesReceived = 0;
     while(socketInfo->Error == 0) {
-        long bytesReceived = socketInfo->TotalBytesRecv;
-        unsigned int packetsReceived = socketInfo->packetCount;
-        window->setReceivedData(bytesReceived, packetsReceived);
-        if (bytesReceived > lastBytesReceived) {
-            lastBytesReceived = bytesReceived;
-            if (isSavedToFile)
-                writeToFile(socketInfo->Buffer);
+        if (socketInfo->TotalBytesRecv > lastBytesReceived && isSavedToFile) {
+            lastBytesReceived = socketInfo->TotalBytesRecv;
+            writeToFile(socketInfo->Buffer);
         }
     }
+    window->setReceivedData(socketInfo->TotalBytesRecv, socketInfo->packetCount);
     return 1;
 }
 
@@ -230,19 +229,15 @@ DWORD WINAPI MainWindow::TimerThread(void* param) {
     LPSOCKET_INFORMATION socketInfo = connection->getSocketInfo();
 
     SYSTEMTIME stStartTime, stEndTime;
-
+    GetSystemTime(&stStartTime);
     GetSystemTime(&stEndTime);
     window->setTimeElapsedOutput(0);
     int bytesReceived = socketInfo->TotalBytesRecv;
-    while(TRUE) {
+    while(socketInfo->Error == 0) {
         if ((res = WaitForSingleObject(window->getUIThreadHandle(), 1)) > 0) {
             if (res == WAIT_TIMEOUT) {
-                if (socketInfo->TotalBytesRecv > 0) {
-                    if (bytesReceived == 0) {
-                            GetSystemTime(&stStartTime);
-                    }
-                    GetSystemTime(&stEndTime);
-                    window->setTimeElapsedOutput(delay(stStartTime, stEndTime));
+                if (socketInfo->TotalBytesRecv > 0 && bytesReceived == 0) {
+                    GetSystemTime(&stStartTime);
                     bytesReceived = socketInfo->TotalBytesRecv;
                 }
                 continue;
@@ -256,5 +251,11 @@ DWORD WINAPI MainWindow::TimerThread(void* param) {
             break;
         }
     }
+    if (delay(stStartTime, stEndTime) < 1) {
+        window->setTimeElapsedOutput(0);
+        return 1;
+    }
+    GetSystemTime(&stEndTime);
+    window->setTimeElapsedOutput(delay(stStartTime, stEndTime));
     return 1;
 }

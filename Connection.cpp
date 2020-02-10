@@ -234,12 +234,12 @@ DWORD WINAPI UDPConnection::WorkerThread(LPVOID lpParameter) {
 
     connection->setReceivedEvent(WSACreateEvent());
 
-    if (connection->getAcceptEvent() == WSA_INVALID_EVENT) {
+    if (connection->getReceivedEvent() == WSA_INVALID_EVENT) {
         perror("Error creating socket event");
         return 0;
     }
 
-    if (WSAEventSelect(connection->getListenSocket(), connection->getReceivedEvent(), FD_CLOSE | FD_READ | FD_OOB) == SOCKET_ERROR) {
+    if (WSAEventSelect(connection->getListenSocket(), connection->getReceivedEvent(), FD_CLOSE | FD_READ) == SOCKET_ERROR) {
         perror("Error listening to socket event");
         return 0;
     }
