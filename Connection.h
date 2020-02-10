@@ -76,13 +76,14 @@ private:
 public:
     TCPConnection() = default;
     TCPConnection(SOCKET s, struct	sockaddr_in *ss) : Connection(s, ss) {}
+    ~TCPConnection() {}
     int sendToServer(const char* data) override;
     void initClientConnection() override;
     void startRoutine(unsigned long) override;
     void stop() override {
         closesocket(AcceptSocket);
         Connection::stop();
-    };
+    }
     SOCKET getAcceptSocket() const {
         return AcceptSocket;
     }
@@ -96,6 +97,7 @@ class UDPConnection : public Connection {
 public:
     UDPConnection() = default;
     UDPConnection(SOCKET s, struct	sockaddr_in *ss) : Connection(s, ss) {}
+    ~UDPConnection() {}
     int sendToServer(const char* data) override;
     void startRoutine(unsigned long) override;
     void initClientConnection() override;

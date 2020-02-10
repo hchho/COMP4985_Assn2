@@ -33,25 +33,25 @@ int TCPConnection::sendToServer(const char* data) {
 
     if (res == SOCKET_ERROR && (WSA_IO_PENDING != WSAGetLastError())) {
         err = WSAGetLastError();
-        return FALSE;
+        return 0;
     }
 
     res = WSAWaitForMultipleEvents(1, &SocketInfo->Overlapped.hEvent, TRUE, INFINITE, TRUE);
 
     if (res == WAIT_FAILED) {
         err = WSAGetLastError();
-        return FALSE;
+        return 0;
     }
 
     res = WSAGetOverlappedResult(sd, &SocketInfo->Overlapped, &SocketInfo->BytesSEND, FALSE, &SocketInfo->Flags);
 
     if (res == FALSE) {
         err = WSAGetLastError();
-        return FALSE;
+        return 0;
     }
 
     WSAResetEvent(SocketInfo->Overlapped.hEvent);
-    return TRUE;
+    return 1;
 }
 
 void TCPConnection::startRoutine(unsigned long packetSize) {
@@ -92,7 +92,7 @@ DWORD WINAPI TCPConnection::WorkerThread(LPVOID lpParameter) {
     if (WSASetEvent(connection->getAcceptEvent()) == FALSE)
     {
         perror("WSASetEvent failed");
-        return FALSE;
+        return 0;
     }
 
     // Save the accept event in the event array.
@@ -109,7 +109,7 @@ DWORD WINAPI TCPConnection::WorkerThread(LPVOID lpParameter) {
             if (Index == WSA_WAIT_FAILED)
             {
                 perror("Waiting for multiple events failed");
-                return FALSE;
+                return 0;
             }
 
             if (Index != WAIT_IO_COMPLETION)
@@ -136,11 +136,11 @@ DWORD WINAPI TCPConnection::WorkerThread(LPVOID lpParameter) {
             if (WSAGetLastError() != WSA_IO_PENDING)
             {
                 perror("I/O operation failed with error");
-                return FALSE;
+                return 0;
             }
         }
     }
-    return FALSE;
+    return 0;
 }
 
 void TCPConnection::initClientConnection() {
@@ -169,23 +169,23 @@ int UDPConnection::sendToServer(const char* data) {
 
     if (res == SOCKET_ERROR && (WSA_IO_PENDING != WSAGetLastError())) {
         err = WSAGetLastError();
-        return FALSE;
+        return 0;
     }
 
     res = WSAWaitForMultipleEvents(1, &SocketInfo->Overlapped.hEvent, TRUE, INFINITE, TRUE);
 
     if (res == WAIT_FAILED) {
         err = WSAGetLastError();
-        return FALSE;
+        return 0;
     }
 
     res = WSAGetOverlappedResult(SocketInfo->Socket, &SocketInfo->Overlapped, &SocketInfo->BytesSEND, FALSE, &SocketInfo->Flags);
 
     if (res == FALSE) {
         err = WSAGetLastError();
-        return FALSE;
+        return 0;
     }
-    return TRUE;
+    return 1;
 }
 
 
@@ -234,12 +234,12 @@ DWORD WINAPI UDPConnection::WorkerThread(LPVOID lpParameter) {
 
     if (connection->getAcceptEvent() == WSA_INVALID_EVENT) {
         perror("Error creating socket event");
-        return FALSE;
+        return 0;
     }
 
     if (WSAEventSelect(connection->getListenSocket(), connection->getReceivedEvent(), FD_CLOSE | FD_READ | FD_OOB) == SOCKET_ERROR) {
         perror("Error listening to socket event");
-        return FALSE;
+        return 0;
     }
 
     EventArray[0] = connection->getReceivedEvent();
@@ -253,7 +253,7 @@ DWORD WINAPI UDPConnection::WorkerThread(LPVOID lpParameter) {
             if (Index == WSA_WAIT_FAILED)
             {
                 perror("Waiting for multiple events failed");
-                return FALSE;
+                return 0;
             }
 
             if (Index != WAIT_IO_COMPLETION)
@@ -282,9 +282,9 @@ DWORD WINAPI UDPConnection::WorkerThread(LPVOID lpParameter) {
             {
                 perror("I/O operation failed with error");
                 delete client;
-                return FALSE;
+                return 0;
             }
         }
     }
-    return FALSE;
+    return 0;
 }

@@ -124,10 +124,10 @@ void MainWindow::on_receiveBtn_clicked()
             exit(1);
         }
     } else {
-        currConnection->stopRoutine();
         ui->receiveBtn->setText("Begin receiving");
         CloseHandle(UIThreadHandle);
         CloseHandle(TimerThreadHandle);
+        currConnection->stopRoutine();
     }
 }
 
@@ -198,7 +198,7 @@ DWORD WINAPI MainWindow::SendThread(void* param) {
         SI->TotalBytesSend += SI->BytesSEND;
         window->setSentData(SI->TotalBytesSend, SI->packetCount);
     }
-    return TRUE;
+    return 1;
 }
 
 DWORD WINAPI MainWindow::UIThread(void* param) {
@@ -217,7 +217,7 @@ DWORD WINAPI MainWindow::UIThread(void* param) {
                 writeToFile(socketInfo->Buffer);
         }
     }
-    return FALSE;
+    return 1;
 }
 
 DWORD WINAPI MainWindow::TimerThread(void* param) {
@@ -225,23 +225,28 @@ DWORD WINAPI MainWindow::TimerThread(void* param) {
     MainWindow* window = (MainWindow*) param;
     Connection* connection = (Connection*)window->getConnection();
     LPSOCKET_INFORMATION socketInfo = connection->getSocketInfo();
-    int counter = 0;
-    window->setTimeElapsedOutput(counter);
+
+    SYSTEMTIME stStartTime, stEndTime;
+    GetSystemTime(&stStartTime);
+    GetSystemTime(&stEndTime);
+    window->setTimeElapsedOutput(0);
+
     while(TRUE) {
         if ((res = WaitForSingleObject(window->getUIThreadHandle(), 1)) > 0) {
             if (res == WAIT_TIMEOUT) {
                 if (socketInfo->TotalBytesRecv > 0)
-                    window->setTimeElapsedOutput(++counter);
+                    GetSystemTime(&stEndTime);
+                    window->setTimeElapsedOutput(delay(stStartTime, stEndTime));
                 continue;
             }
             else {
                 perror("Error waiting");
                 int error = GetLastError();
-                return FALSE;
+                return 0;
             }
         } else {
             break;
         }
     }
-    return FALSE;
+    return 1;
 }
