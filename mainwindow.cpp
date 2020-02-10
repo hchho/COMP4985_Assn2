@@ -234,22 +234,11 @@ DWORD WINAPI MainWindow::TimerThread(void* param) {
     window->setTimeElapsedOutput(0);
     int bytesReceived = socketInfo->TotalBytesRecv;
     while(socketInfo->Error == 0) {
-//        if ((res = WaitForSingleObject(window->getUIThreadHandle(), 1)) > 0) {
-//            if (res == WAIT_TIMEOUT) {
                 if (socketInfo->TotalBytesRecv > 0 && bytesReceived == 0) {
                     GetSystemTime(&stStartTime);
                     bytesReceived = socketInfo->TotalBytesRecv;
                 }
-//                continue;
-//            }
-//            else {
-//                perror("Error waiting");
-//                int error = GetLastError();
-//                return 0;
-//            }
-//        } else {
-//            break;
-//        }
+
     }
 
     if (bytesReceived == 0) {
