@@ -192,6 +192,9 @@ DWORD WINAPI MainWindow::SendThread(void* param) {
 
     SI->TotalBytesSend = 0;
     for(int i = 0; i < count; i++) {
+        if (i == count - 1) { // send final packet with terminating character
+            memset(output, 'c', packetSize);
+        }
         if (connection->sendToServer(output) == FALSE) {
             return FALSE;
         }

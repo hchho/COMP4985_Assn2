@@ -81,6 +81,7 @@ DWORD WINAPI TCPConnection::WorkerThread(LPVOID lpParameter) {
     TCPConnection *connection = (TCPConnection*) lpParameter;
     LPSOCKET_INFORMATION SI = connection->SocketInfo;
     SI->TotalBytesRecv = 0;
+    SI->Error = 0;
 
     if ((accept_socket = accept (connection->getListenSocket(), NULL, NULL)) == -1) {
         perror("Can't accept client");
@@ -226,6 +227,7 @@ DWORD WINAPI UDPConnection::WorkerThread(LPVOID lpParameter) {
     UDPConnection *connection = (UDPConnection*) lpParameter;
     LPSOCKET_INFORMATION SI = connection->SocketInfo;
     SI->TotalBytesRecv = 0;
+    SI->Error = 0;
 
     client = (struct sockaddr_in*)malloc(sizeof(*client));
     client_len = sizeof(*client);

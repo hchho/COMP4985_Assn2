@@ -83,4 +83,8 @@ void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
         SI->packetCount++;
         SI->TotalBytesRecv += SI->BytesRECV;
     }
+    if (SI->Buffer[0] == 'c') { // last packet and exit
+        SI->Error = TRUE;
+        return;
+    }
 }
