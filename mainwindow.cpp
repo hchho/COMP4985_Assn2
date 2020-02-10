@@ -138,6 +138,7 @@ void MainWindow::on_sendFileBtn_clicked()
     LPSOCKET_INFORMATION SI = currConnection->getSocketInfo();
     ui->bytesSentOutput->setText(QString::number(SI->TotalBytesSend));
     ui->packetsSentOutput->setText(QString::number(SI->packetCount++));
+    ConnectivityManager::instance()->closeConnection(currConnection);
     return;
 }
 

@@ -3,7 +3,7 @@
 
 void writeToFile(const char* data) {
     std::ofstream file;
-    file.open("output.txt");
+    file.open("output.txt", std::ios_base::app);
     file << data;
     file.close();
 }

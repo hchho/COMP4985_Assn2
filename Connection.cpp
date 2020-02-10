@@ -20,10 +20,6 @@ int Connection::sendFileToServer(const char *filePath) {
     if (!sendToServer(buffer)) {
         return FALSE;
     }
-    // Send final frame
-    if (!sendToServer("c")) {
-        return FALSE;
-    }
     delete[] buffer;
     return TRUE;
 }
