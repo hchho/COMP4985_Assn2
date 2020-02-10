@@ -92,10 +92,6 @@ void MainWindow::on_connectBtn_clicked()
 void MainWindow::on_sendPacketBtn_clicked()
 {
     if (isConnected && connectionType == ConnectionType::CLIENT) {
-
-        int numberOfBytesToSend = getPacketSize();
-        int numberOfTimesToSend = getNumberOfTimesToSend();
-
         SendThreadHandle = CreateThread(NULL, 0, SendThread, (void *) this, 0, &SendThreadId);
 
         ui->sendPacketBtn->setText("Sending...");
@@ -103,6 +99,9 @@ void MainWindow::on_sendPacketBtn_clicked()
             ErrorHandler::showMessage("Error sending packets");
         }
         CloseHandle(SendThreadHandle);
+        isConnected = !isConnected;
+        ConnectivityManager::instance()->closeConnection(currConnection);
+        ui->connectBtn->setText("Connect");
         ui->sendPacketBtn->setText("Send Packet");
     }
 }
@@ -161,20 +160,26 @@ bool MainWindow::getIsSavedInputBoxChecked() {
 }
 
 void MainWindow::setSentData(unsigned long bytesSent, unsigned int packets) {
+    mtx.lock();
     ui->bytesSentOutput->setText(QString::number(bytesSent));
     ui->packetsSentOutput->setText(QString::number(packets));
+    mtx.unlock();
 }
+
 void MainWindow::setReceivedData(unsigned long bytesReceived, unsigned int packets) {
+    mtx.lock();
     ui->packetsReceivedOutput->setText(QString::number(packets));
     ui->bytesReceivedOutput->setText(QString::number(bytesReceived));
+    mtx.unlock();
 }
 
 void MainWindow::setTimeElapsedOutput(int time) {
+    mtx.lock();
     ui->timeElapsedOutput->setText(QString::number(time));
-};
+    mtx.unlock();
+}
 
 DWORD WINAPI MainWindow::SendThread(void* param) {
-    int res, err;
     MainWindow* window = (MainWindow*) param;
     Connection* connection = window->getConnection();
     LPSOCKET_INFORMATION SI = connection->getSocketInfo();

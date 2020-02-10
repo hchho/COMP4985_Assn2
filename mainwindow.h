@@ -6,10 +6,13 @@ void on_sendFileBtn_clicked();
 #include <ConnectivityManager.h>
 #include <ConnectionType.h>
 #include <fstream>
+#include <mutex>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
+
+static std::mutex mtx;
 
 class MainWindow : public QMainWindow
 {
