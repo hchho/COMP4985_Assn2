@@ -250,7 +250,7 @@ DWORD WINAPI UDPConnection::WorkerThread(LPVOID lpParameter) {
     {
         while(TRUE)
         {
-            Index = WSAWaitForMultipleEvents(1, EventArray, FALSE, WSA_INFINITE, TRUE);
+            Index = WSAWaitForMultipleEvents(1, EventArray, FALSE, 10000, TRUE);
 
             if (Index == WSA_WAIT_FAILED)
             {
@@ -258,11 +258,17 @@ DWORD WINAPI UDPConnection::WorkerThread(LPVOID lpParameter) {
                 return 0;
             }
 
+            if (Index == WSA_WAIT_TIMEOUT) {
+                perror("Timed out");
+                SI->Error = 1;
+                return 0;
+            }
+
             if (Index != WAIT_IO_COMPLETION)
             {
-                // An accept() call event is ready - break the wait loop
                 break;
             }
+
         }
 
         WSAResetEvent(EventArray[Index - WSA_WAIT_EVENT_0]);
@@ -288,12 +294,12 @@ DWORD WINAPI UDPConnection::WorkerThread(LPVOID lpParameter) {
             }
         }
         if (SI->BytesRECV > 0) {
+            if (SI->TotalBytesRecv == 0) {
+                GetSystemTime(&SI->stStartTime);
+            }
             SI->packetCount++;
             SI->TotalBytesRecv += SI->BytesRECV;
-        }
-        if (SI->Buffer[0] == 'c') { // last packet and exit
-            SI->Error = TRUE;
-            return 0;
+            GetSystemTime(&SI->stEndTime);
         }
     }
     return 0;

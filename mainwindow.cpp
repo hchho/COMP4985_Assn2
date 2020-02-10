@@ -193,9 +193,6 @@ DWORD WINAPI MainWindow::SendThread(void* param) {
 
     SI->TotalBytesSend = 0;
     for(int i = 0; i < count; i++) {
-        if (i == count - 1) { // send final packet with terminating character
-            memset(output, 'c', packetSize);
-        }
         if (connection->sendToServer(output) == FALSE) {
             return FALSE;
         }
@@ -224,29 +221,14 @@ DWORD WINAPI MainWindow::UIThread(void* param) {
 }
 
 DWORD WINAPI MainWindow::TimerThread(void* param) {
-    int res;
     MainWindow* window = (MainWindow*) param;
     Connection* connection = (Connection*)window->getConnection();
     LPSOCKET_INFORMATION socketInfo = connection->getSocketInfo();
 
-    SYSTEMTIME stStartTime, stEndTime;
-    GetSystemTime(&stStartTime);
-    GetSystemTime(&stEndTime);
     window->setTimeElapsedOutput(0);
     int bytesReceived = socketInfo->TotalBytesRecv;
     while(socketInfo->Error == 0) {
-                if (socketInfo->TotalBytesRecv > 0 && bytesReceived == 0) {
-                    GetSystemTime(&stStartTime);
-                    bytesReceived = socketInfo->TotalBytesRecv;
-                }
-
     }
-
-    if (bytesReceived == 0) {
-        window->setTimeElapsedOutput(0);
-        return 1;
-    }
-    GetSystemTime(&stEndTime);
-    window->setTimeElapsedOutput(delay(stStartTime, stEndTime));
+    window->setTimeElapsedOutput(delay(socketInfo->stStartTime, socketInfo->stEndTime));
     return 1;
 }

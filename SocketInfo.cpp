@@ -36,8 +36,12 @@ void CALLBACK TCPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
         }
     }
     if (BytesTransferred > 0) {
+        if (SI->TotalBytesRecv == 0) {
+            GetSystemTime(&SI->stStartTime);
+        }
         SI->packetCount++;
         SI->TotalBytesRecv += BytesTransferred;
+        GetSystemTime(&SI->stEndTime);
     }
 }
 
@@ -80,11 +84,11 @@ void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
         }
     }
     if (SI->BytesRECV > 0) {
+        if (SI->TotalBytesRecv) {
+            GetSystemTime(&SI->stStartTime);
+        }
         SI->packetCount++;
         SI->TotalBytesRecv += SI->BytesRECV;
-    }
-    if (SI->Buffer[0] == 'c') { // last packet and exit
-        SI->Error = TRUE;
-        return;
+        GetSystemTime(&SI->stEndTime);
     }
 }
