@@ -11,13 +11,6 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
-typedef struct {
-    Connection* connection;
-    int packetSize;
-    int numberOfTimesToSend;
-    Ui::MainWindow *ui;
-} SEND_INFO;
-
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -26,13 +19,24 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     static DWORD WINAPI UIThread(void* param);
-    static DWORD WINAPI MainWindow::SendThread(void* param);
-    Ui::MainWindow* getUI() const {
-        return ui;
-    }
+    static DWORD WINAPI SendThread(void* param);
+    static DWORD WINAPI TimerThread(void* param);
     Connection* getConnection() const {
         return currConnection;
     }
+    HANDLE getUIThreadHandle() const {
+        return UIThreadHandle;
+    }
+    HANDLE getSendThreadHandle() const {
+        return SendThreadHandle;
+    }
+    void setSentData(unsigned long bytesSent, unsigned int packets);
+    void setReceivedData(unsigned long bytesReceived, unsigned int packets);
+    void setTimeElapsedOutput(int);
+
+    int getPacketSize();
+    int getNumberOfTimesToSend();
+    bool getIsSavedInputBoxChecked();
 
 private slots:
     void on_actionTCP_triggered();
@@ -56,11 +60,12 @@ private:
     Connection* currConnection;
     bool isConnected = false;
     bool isReceiving = false;
+    HANDLE SendThreadHandle;
+    DWORD SendThreadId;
+    HANDLE TimerThreadHandle;
+    DWORD TimerThreadId;
     HANDLE UIThreadHandle;
     DWORD UIThreadId;
-    int getPacketSize();
-    int getNumberOfTimesToSend();
 };
 
-void writeToFile(const char*);
 #endif // MAINWINDOW_H

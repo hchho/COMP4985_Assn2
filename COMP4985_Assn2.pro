@@ -18,6 +18,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     Connection.cpp \
     ConnectivityManager.cpp \
+    Helpers.cpp \
     SocketInfo.cpp \
     main.cpp \
     mainwindow.cpp
@@ -27,6 +28,7 @@ HEADERS += \
     ConnectionType.h \
     ConnectivityManager.h \
     ErrorHandler.h \
+    Helpers.h \
     ProtocolType.h \
     SocketInfo.h \
     mainwindow.h

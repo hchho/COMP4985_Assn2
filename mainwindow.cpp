@@ -9,6 +9,7 @@
 #include "ui_mainwindow.h"
 #include "ErrorHandler.h"
 #include "SocketInfo.h"
+#include "Helpers.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -91,28 +92,18 @@ void MainWindow::on_connectBtn_clicked()
 void MainWindow::on_sendPacketBtn_clicked()
 {
     if (isConnected && connectionType == ConnectionType::CLIENT) {
-        HANDLE sendThreadHandle;
-        DWORD sendThreadId;
-
-        SEND_INFO *sendInfo = (SEND_INFO*)malloc(sizeof(SEND_INFO));
 
         int numberOfBytesToSend = getPacketSize();
         int numberOfTimesToSend = getNumberOfTimesToSend();
 
-        sendInfo->connection = currConnection;
-        sendInfo->packetSize = numberOfBytesToSend;
-        sendInfo->numberOfTimesToSend = numberOfTimesToSend;
-        sendInfo->ui = ui;
-
-        sendThreadHandle = CreateThread(NULL, 0, SendThread, (void *) sendInfo, 0, &sendThreadId);
+        SendThreadHandle = CreateThread(NULL, 0, SendThread, (void *) this, 0, &SendThreadId);
 
         ui->sendPacketBtn->setText("Sending...");
-        if(WaitForSingleObject(sendThreadHandle, INFINITE)) {
+        if(WaitForSingleObject(SendThreadHandle, INFINITE)) {
             ErrorHandler::showMessage("Error sending packets");
         }
-        CloseHandle(sendThreadHandle);
+        CloseHandle(SendThreadHandle);
         ui->sendPacketBtn->setText("Send Packet");
-        delete sendInfo;
     }
 }
 
@@ -125,14 +116,30 @@ void MainWindow::on_receiveBtn_clicked()
         ui->receiveBtn->setText("Stop receiving");
         if ((UIThreadHandle = CreateThread(NULL, 0, UIThread, (LPVOID) this, 0, &UIThreadId)) == NULL)
         {
-            ErrorHandler::showMessage("Error creating thread");
+            ErrorHandler::showMessage("Error creating UI thread");
+            exit(1);
+        }
+        if ((TimerThreadHandle = CreateThread(NULL, 0, TimerThread, (LPVOID) this, 0, &TimerThreadId)) == NULL)
+        {
+            ErrorHandler::showMessage("Error creating timer thread");
             exit(1);
         }
     } else {
         currConnection->stopRoutine();
         ui->receiveBtn->setText("Begin receiving");
         CloseHandle(UIThreadHandle);
+        CloseHandle(TimerThreadHandle);
     }
+}
+
+void MainWindow::on_sendFileBtn_clicked()
+{
+    QString filePath = QFileDialog::getOpenFileName(this, "Open a file", "", "Text files (*.txt)");
+    currConnection->sendFileToServer(filePath.toStdString().c_str());
+    LPSOCKET_INFORMATION SI = currConnection->getSocketInfo();
+    ui->bytesSentOutput->setText(QString::number(SI->TotalBytesSend));
+    ui->packetsSentOutput->setText(QString::number(SI->packetCount++));
+    return;
 }
 
 int MainWindow::getPacketSize() {
@@ -149,42 +156,58 @@ int MainWindow::getNumberOfTimesToSend() {
     return numberOfTimesToSend;
 }
 
+bool MainWindow::getIsSavedInputBoxChecked() {
+    return ui->saveInputBox->isChecked();
+}
+
+void MainWindow::setSentData(unsigned long bytesSent, unsigned int packets) {
+    ui->bytesSentOutput->setText(QString::number(bytesSent));
+    ui->packetsSentOutput->setText(QString::number(packets));
+}
+void MainWindow::setReceivedData(unsigned long bytesReceived, unsigned int packets) {
+    ui->packetsReceivedOutput->setText(QString::number(packets));
+    ui->bytesReceivedOutput->setText(QString::number(bytesReceived));
+}
+
+void MainWindow::setTimeElapsedOutput(int time) {
+    ui->timeElapsedOutput->setText(QString::number(time));
+};
+
 DWORD WINAPI MainWindow::SendThread(void* param) {
     int res, err;
-    SEND_INFO* sendInfo = (SEND_INFO*) param;
-
-    Connection* connection = sendInfo->connection;
+    MainWindow* window = (MainWindow*) param;
+    Connection* connection = window->getConnection();
     LPSOCKET_INFORMATION SI = connection->getSocketInfo();
-    Ui::MainWindow *ui = sendInfo->ui;
-    int packetSize = sendInfo->packetSize;
-    int count = sendInfo->numberOfTimesToSend;
+
+    int packetSize = window->getPacketSize();
+    int count = window->getNumberOfTimesToSend();
 
     char* output = (char*)malloc(packetSize);
     memset(output, 'a', packetSize);
+
     SI->TotalBytesSend = 0;
     for(int i = 0; i < count; i++) {
         if (connection->sendToServer(output) == FALSE) {
             return FALSE;
         }
         SI->TotalBytesSend += SI->BytesSEND;
-        ui->bytesSentOutput->setText(QString::number(SI->TotalBytesSend));
-        ui->packetsSentOutput->setText(QString::number(SI->packetCount));
+        window->setSentData(SI->TotalBytesSend, SI->packetCount);
     }
     return TRUE;
 }
 
 DWORD WINAPI MainWindow::UIThread(void* param) {
     MainWindow* window = (MainWindow*) param;
-    Ui::MainWindow *ui = window->getUI();
     Connection* connection = (Connection*)window->getConnection();
     LPSOCKET_INFORMATION socketInfo = connection->getSocketInfo();
-    bool isSavedToFile = ui->saveInputBox->isChecked();
+    bool isSavedToFile = window->getIsSavedInputBoxChecked();
     int lastBytesReceived = 0;
     while(socketInfo->Error == 0) {
-        ui->packetsReceivedOutput->setText(QString::number(socketInfo->packetCount));
-        ui->bytesReceivedOutput->setText(QString::number(socketInfo->TotalBytesRecv));
-        if (socketInfo->TotalBytesRecv > lastBytesReceived) {
-            lastBytesReceived = socketInfo->TotalBytesRecv;
+        long bytesReceived = socketInfo->TotalBytesRecv;
+        unsigned int packetsReceived = socketInfo->packetCount;
+        window->setReceivedData(bytesReceived, packetsReceived);
+        if (bytesReceived > lastBytesReceived) {
+            lastBytesReceived = bytesReceived;
             if (isSavedToFile)
                 writeToFile(socketInfo->Buffer);
         }
@@ -192,19 +215,28 @@ DWORD WINAPI MainWindow::UIThread(void* param) {
     return FALSE;
 }
 
-void writeToFile(const char* data) {
-    std::ofstream file;
-    file.open("output.txt");
-    file << data;
-    file.close();
-}
-
-void MainWindow::on_sendFileBtn_clicked()
-{
-    QString filePath = QFileDialog::getOpenFileName(this, "Open a file", "", "Text files (*.txt)");
-    currConnection->sendFileToServer(filePath.toStdString().c_str());
-    LPSOCKET_INFORMATION SI = currConnection->getSocketInfo();
-    ui->bytesSentOutput->setText(QString::number(SI->TotalBytesSend));
-    ui->packetsSentOutput->setText(QString::number(SI->packetCount));
-    return;
+DWORD WINAPI MainWindow::TimerThread(void* param) {
+    int res;
+    MainWindow* window = (MainWindow*) param;
+    Connection* connection = (Connection*)window->getConnection();
+    LPSOCKET_INFORMATION socketInfo = connection->getSocketInfo();
+    int counter = 0;
+    window->setTimeElapsedOutput(counter);
+    while(TRUE) {
+        if ((res = WaitForSingleObject(window->getUIThreadHandle(), 1)) > 0) {
+            if (res == WAIT_TIMEOUT) {
+                if (socketInfo->TotalBytesRecv > 0)
+                    window->setTimeElapsedOutput(++counter);
+                continue;
+            }
+            else {
+                perror("Error waiting");
+                int error = GetLastError();
+                return FALSE;
+            }
+        } else {
+            break;
+        }
+    }
+    return FALSE;
 }
