@@ -287,6 +287,14 @@ DWORD WINAPI UDPConnection::WorkerThread(LPVOID lpParameter) {
                 return 0;
             }
         }
+        if (SI->BytesRECV > 0) {
+            SI->packetCount++;
+            SI->TotalBytesRecv += SI->BytesRECV;
+        }
+        if (SI->Buffer[0] == 'c') { // last packet and exit
+            SI->Error = TRUE;
+            return 0;
+        }
     }
     return 0;
 }
