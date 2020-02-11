@@ -203,18 +203,10 @@ DWORD WINAPI MainWindow::SendThread(void* param) {
 }
 
 DWORD WINAPI MainWindow::UIThread(void* param) {
-    long bytesReceived;
-    unsigned int packetsReceived;
     MainWindow* window = (MainWindow*) param;
     Connection* connection = (Connection*)window->getConnection();
     LPSOCKET_INFORMATION socketInfo = connection->getSocketInfo();
-    bool isSavedToFile = window->getIsSavedInputBoxChecked();
-    int lastBytesReceived = 0;
     while(socketInfo->Error == 0) {
-        if (socketInfo->TotalBytesRecv > lastBytesReceived && isSavedToFile) {
-            lastBytesReceived = socketInfo->TotalBytesRecv;
-            writeToFile(socketInfo->Buffer);
-        }
     }
     window->setReceivedData(socketInfo->TotalBytesRecv, socketInfo->packetCount);
     return 1;
@@ -226,7 +218,6 @@ DWORD WINAPI MainWindow::TimerThread(void* param) {
     LPSOCKET_INFORMATION socketInfo = connection->getSocketInfo();
 
     window->setTimeElapsedOutput(0);
-    int bytesReceived = socketInfo->TotalBytesRecv;
     while(socketInfo->Error == 0) {
     }
     window->setTimeElapsedOutput(delay(socketInfo->stStartTime, socketInfo->stEndTime));
