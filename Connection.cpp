@@ -123,7 +123,6 @@ DWORD WINAPI TCPConnection::WorkerThread(LPVOID lpParameter) {
         WSAResetEvent(EventArray[Index - WSA_WAIT_EVENT_0]);
 
         // Fill in the details of our accepted socket.
-
         SI->Socket = connection->getAcceptSocket();
         SI->BytesSEND = 0;
         SI->BytesRECV = 0;

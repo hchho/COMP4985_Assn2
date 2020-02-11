@@ -1,5 +1,5 @@
 #include "SocketInfo.h"
-#include "ErrorHandler.h"
+#include "Helpers.h"
 
 void CALLBACK TCPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
                                LPWSAOVERLAPPED Overlapped, DWORD InFlags) {
@@ -26,12 +26,16 @@ void CALLBACK TCPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
 
     Flags = 0;
 
+    if (BytesTransferred == SI->DataBuf.len) {
+        //        writeToFile(SI->DataBuf.buf); // Write buffer to file first
+    }
+
     if (WSARecv(SI->Socket, &(SI->DataBuf), 1, &SI->BytesRECV, &Flags,
                 &(SI->Overlapped), TCPWorkerRoutine) == SOCKET_ERROR)
     {
         if (WSAGetLastError() != WSA_IO_PENDING )
         {
-            ErrorHandler::showMessage("WSARecv() failed with error %d\n");
+            perror("WSARecv() failed with error %d\n");
             return;
         }
     }

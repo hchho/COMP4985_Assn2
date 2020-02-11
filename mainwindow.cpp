@@ -206,6 +206,7 @@ DWORD WINAPI MainWindow::UIThread(void* param) {
     MainWindow* window = (MainWindow*) param;
     Connection* connection = (Connection*)window->getConnection();
     LPSOCKET_INFORMATION socketInfo = connection->getSocketInfo();
+    window->setReceivedData(0, 0);
     while(socketInfo->Error == 0) {
     }
     window->setReceivedData(socketInfo->TotalBytesRecv, socketInfo->packetCount);
