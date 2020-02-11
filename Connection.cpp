@@ -292,14 +292,6 @@ DWORD WINAPI UDPConnection::WorkerThread(LPVOID lpParameter) {
                 return 0;
             }
         }
-        if (SI->BytesRECV > 0) {
-            if (SI->TotalBytesRecv == 0) {
-                GetSystemTime(&SI->stStartTime);
-            }
-            SI->packetCount++;
-            SI->TotalBytesRecv += SI->BytesRECV;
-            GetSystemTime(&SI->stEndTime);
-        }
     }
     return 0;
 }

@@ -86,7 +86,7 @@ void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
             return;
         }
     }
-    if (SI->TotalBytesRecv) {
+    if (SI->TotalBytesRecv == 0) {
         GetSystemTime(&SI->stStartTime);
     }
     SI->packetCount++;
