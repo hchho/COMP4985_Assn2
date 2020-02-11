@@ -20,15 +20,15 @@ void CALLBACK TCPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
     if (Error != 0 || BytesTransferred == 0)
     {
         closesocket(SI->Socket);
-        SI->Error = Error || TRUE;
+        SetEvent(SI->EndEvent);
         return;
     }
 
     Flags = 0;
 
-    if (BytesTransferred == SI->DataBuf.len) {
-        //        writeToFile(SI->DataBuf.buf); // Write buffer to file first
-    }
+//    if (BytesTransferred == SI->DataBuf.len) {
+//        //        writeToFile(SI->DataBuf.buf); // Write buffer to file first
+//    }
 
     if (WSARecv(SI->Socket, &(SI->DataBuf), 1, &SI->BytesRECV, &Flags,
                 &(SI->Overlapped), TCPWorkerRoutine) == SOCKET_ERROR)
@@ -39,14 +39,13 @@ void CALLBACK TCPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
             return;
         }
     }
-    if (BytesTransferred > 0) {
-        if (SI->TotalBytesRecv == 0) {
-            GetSystemTime(&SI->stStartTime);
-        }
-        SI->packetCount++;
-        SI->TotalBytesRecv += BytesTransferred;
-        GetSystemTime(&SI->stEndTime);
+    if (SI->TotalBytesRecv == 0) {
+        GetSystemTime(&SI->stStartTime);
     }
+    SI->packetCount++;
+    SI->TotalBytesRecv += BytesTransferred;
+    GetSystemTime(&SI->stEndTime);
+
 }
 
 void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
@@ -72,7 +71,7 @@ void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
     if (Error != 0 || BytesTransferred == 0)
     {
         closesocket(SI->Socket);
-        SI->Error = Error || TRUE;
+        SetEvent(SI->EndEvent);
         return;
     }
 
@@ -87,12 +86,10 @@ void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
             return;
         }
     }
-    if (SI->BytesRECV > 0) {
-        if (SI->TotalBytesRecv) {
-            GetSystemTime(&SI->stStartTime);
-        }
-        SI->packetCount++;
-        SI->TotalBytesRecv += SI->BytesRECV;
-        GetSystemTime(&SI->stEndTime);
+    if (SI->TotalBytesRecv) {
+        GetSystemTime(&SI->stStartTime);
     }
+    SI->packetCount++;
+    SI->TotalBytesRecv += SI->BytesRECV;
+    GetSystemTime(&SI->stEndTime);
 }

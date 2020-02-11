@@ -69,6 +69,7 @@ void TCPConnection::startRoutine(unsigned long packetSize) {
         ErrorHandler::showMessage("Error creating thread");
         exit(1);
     }
+
     return;
 }
 
@@ -81,7 +82,7 @@ DWORD WINAPI TCPConnection::WorkerThread(LPVOID lpParameter) {
     TCPConnection *connection = (TCPConnection*) lpParameter;
     LPSOCKET_INFORMATION SI = connection->SocketInfo;
     SI->TotalBytesRecv = 0;
-    SI->Error = 0;
+    SI->EndEvent = CreateEvent(NULL, FALSE, FALSE, TEXT("EndEvent"));
 
     if ((accept_socket = accept (connection->getListenSocket(), NULL, NULL)) == -1) {
         perror("Can't accept client");
@@ -99,7 +100,7 @@ DWORD WINAPI TCPConnection::WorkerThread(LPVOID lpParameter) {
     // Save the accept event in the event array.
     EventArray[0] = connection->getAcceptEvent();
 
-    while(SI->Error == 0)
+    while(TRUE)
     {
         // Wait for accept() to signal an event and also process WorkerRoutine() returns.
 
@@ -124,9 +125,9 @@ DWORD WINAPI TCPConnection::WorkerThread(LPVOID lpParameter) {
 
         // Fill in the details of our accepted socket.
         SI->Socket = connection->getAcceptSocket();
+        ZeroMemory(&(SI->Overlapped), sizeof(WSAOVERLAPPED));
         SI->BytesSEND = 0;
         SI->BytesRECV = 0;
-        SI->Error = 0;
         SI->DataBuf.buf = SI->Buffer;
 
         Flags = 0;
@@ -226,9 +227,9 @@ DWORD WINAPI UDPConnection::WorkerThread(LPVOID lpParameter) {
     UDPConnection *connection = (UDPConnection*) lpParameter;
     LPSOCKET_INFORMATION SI = connection->SocketInfo;
     SI->TotalBytesRecv = 0;
-    SI->Error = 0;
+    SI->EndEvent = CreateEvent(NULL, FALSE, FALSE, TEXT("EndEvent"));
 
-    client = (struct sockaddr_in*)malloc(sizeof(*client));
+            client = (struct sockaddr_in*)malloc(sizeof(*client));
     client_len = sizeof(*client);
 
     connection->setReceivedEvent(WSACreateEvent());
@@ -245,7 +246,7 @@ DWORD WINAPI UDPConnection::WorkerThread(LPVOID lpParameter) {
 
     EventArray[0] = connection->getReceivedEvent();
 
-    while(SI->Error == 0)
+    while(TRUE)
     {
         while(TRUE)
         {
@@ -259,7 +260,7 @@ DWORD WINAPI UDPConnection::WorkerThread(LPVOID lpParameter) {
 
             if (Index == WSA_WAIT_TIMEOUT) {
                 perror("Timed out");
-                SI->Error = 1;
+                SetEvent(SI->EndEvent);
                 return 0;
             }
 
@@ -278,7 +279,6 @@ DWORD WINAPI UDPConnection::WorkerThread(LPVOID lpParameter) {
         ZeroMemory(&(SI->Overlapped), sizeof(WSAOVERLAPPED));
         SI->BytesSEND = 0;
         SI->BytesRECV = 0;
-        SI->Error = 0;
         SI->DataBuf.buf = SI->Buffer;
         SI->Flags = 0;
 

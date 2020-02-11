@@ -36,6 +36,10 @@ public:
         {
             ErrorHandler::showMessage("GlobalAlloc() failed");
         }
+
+        CloseHandle(AcceptEvent);
+        CloseHandle(ReceivedEvent);
+        CloseHandle(SocketInfo->EndEvent);
     }
     virtual ~Connection() {
         delete[] buf;

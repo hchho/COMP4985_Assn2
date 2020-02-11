@@ -27,12 +27,6 @@ public:
     Connection* getConnection() const {
         return currConnection;
     }
-    HANDLE getUIThreadHandle() const {
-        return UIThreadHandle;
-    }
-    HANDLE getSendThreadHandle() const {
-        return SendThreadHandle;
-    }
     void setSentData(unsigned long bytesSent, unsigned int packets);
     void setReceivedData(unsigned long bytesReceived, unsigned int packets);
     void setTimeElapsedOutput(int);
@@ -65,8 +59,6 @@ private:
     bool isReceiving = false;
     HANDLE SendThreadHandle;
     DWORD SendThreadId;
-    HANDLE TimerThreadHandle;
-    DWORD TimerThreadId;
     HANDLE UIThreadHandle;
     DWORD UIThreadId;
 };

@@ -118,15 +118,9 @@ void MainWindow::on_receiveBtn_clicked()
             ErrorHandler::showMessage("Error creating UI thread");
             exit(1);
         }
-        if ((TimerThreadHandle = CreateThread(NULL, 0, TimerThread, (LPVOID) this, 0, &TimerThreadId)) == NULL)
-        {
-            ErrorHandler::showMessage("Error creating timer thread");
-            exit(1);
-        }
     } else {
         ui->receiveBtn->setText("Begin receiving");
         CloseHandle(UIThreadHandle);
-        CloseHandle(TimerThreadHandle);
         currConnection->stopRoutine();
     }
 }
@@ -207,20 +201,9 @@ DWORD WINAPI MainWindow::UIThread(void* param) {
     Connection* connection = (Connection*)window->getConnection();
     LPSOCKET_INFORMATION socketInfo = connection->getSocketInfo();
     window->setReceivedData(0, 0);
-    while(socketInfo->Error == 0) {
-    }
-    window->setReceivedData(socketInfo->TotalBytesRecv, socketInfo->packetCount);
-    return 1;
-}
-
-DWORD WINAPI MainWindow::TimerThread(void* param) {
-    MainWindow* window = (MainWindow*) param;
-    Connection* connection = (Connection*)window->getConnection();
-    LPSOCKET_INFORMATION socketInfo = connection->getSocketInfo();
-
     window->setTimeElapsedOutput(0);
-    while(socketInfo->Error == 0) {
-    }
+    WaitForSingleObject(socketInfo->EndEvent, INFINITE);
+    window->setReceivedData(socketInfo->TotalBytesRecv, socketInfo->packetCount);
     window->setTimeElapsedOutput(delay(socketInfo->stStartTime, socketInfo->stEndTime));
     return 1;
 }
