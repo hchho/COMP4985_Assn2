@@ -27,7 +27,7 @@ void CALLBACK TCPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
     Flags = 0;
 
     writeToFile(SI->DataBuf.buf); // Write buffer to file first
-    memset(SI->Buffer, 0, DATA_BUFSIZE);
+    memset(SI->Buffer, 0, DATA_BUFSIZE); // This is done to ensure the buffer is clear before it reads
     SI->DataBuf.buf = SI->Buffer;
 
     if (WSARecv(SI->Socket, &(SI->DataBuf), 1, &SI->BytesRECV, &Flags,

@@ -68,13 +68,6 @@
          </property>
         </widget>
        </item>
-       <item>
-        <widget class="QCheckBox" name="saveInputBox">
-         <property name="text">
-          <string>Save Input to File</string>
-         </property>
-        </widget>
-       </item>
       </layout>
      </item>
      <item>
@@ -248,7 +241,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>22</height>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuConnect">
