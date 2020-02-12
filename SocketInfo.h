@@ -1,7 +1,7 @@
 #ifndef SOCKETINFO_H
 #define SOCKETINFO_H
 
-#define DATA_BUFSIZE 60000
+#define DATA_BUFSIZE 100000
 
 #include <WinSock2.h>
 
