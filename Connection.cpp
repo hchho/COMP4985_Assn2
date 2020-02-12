@@ -126,6 +126,7 @@ DWORD WINAPI TCPConnection::WorkerThread(LPVOID lpParameter) {
         // Fill in the details of our accepted socket.
         SI->Socket = connection->getAcceptSocket();
         ZeroMemory(&(SI->Overlapped), sizeof(WSAOVERLAPPED));
+        memset(SI->Buffer, 0, DATA_BUFSIZE);
         SI->BytesSEND = 0;
         SI->BytesRECV = 0;
         SI->DataBuf.buf = SI->Buffer;
@@ -277,6 +278,7 @@ DWORD WINAPI UDPConnection::WorkerThread(LPVOID lpParameter) {
 
         SI->Socket = connection->getListenSocket();
         ZeroMemory(&(SI->Overlapped), sizeof(WSAOVERLAPPED));
+        memset(SI->Buffer, 0, DATA_BUFSIZE);
         SI->BytesSEND = 0;
         SI->BytesRECV = 0;
         SI->DataBuf.buf = SI->Buffer;
