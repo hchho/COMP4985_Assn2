@@ -190,7 +190,6 @@ DWORD WINAPI MainWindow::SendThread(void* param) {
         if (connection->sendToServer(output) == FALSE) {
             return FALSE;
         }
-        SI->TotalBytesSend += SI->BytesSEND;
         window->setSentData(SI->TotalBytesSend, SI->packetCount);
     }
     return 1;

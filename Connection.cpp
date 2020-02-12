@@ -1,26 +1,22 @@
 #include "Connection.h"
+#include "Helpers.h"
+#include <streambuf>
 
 int Connection::sendFileToServer(const char *filePath) {
-    std::streampos begin,end;
-    unsigned long size;
-    char* buffer;
+    std::string buffer;
 
     std::ifstream fileToSend(filePath);
 
-    begin = fileToSend.tellg();
     fileToSend.seekg(0, std::ios::end);
-    end = fileToSend.tellg();
-
-    size = end - begin;
-    buffer = new char[size];
+    buffer.reserve(fileToSend.tellg());
     fileToSend.seekg(0, std::ios::beg);
-    fileToSend.read(buffer, size);
-    fileToSend.close();
 
-    if (!sendToServer(buffer)) {
+    buffer.assign((std::istreambuf_iterator<char>(fileToSend)), std::istreambuf_iterator<char>());
+
+    writeToFile(buffer.c_str()); // Write buffer to file first
+    if (!sendToServer(buffer.c_str())) {
         return FALSE;
     }
-    delete[] buffer;
     return TRUE;
 }
 
@@ -51,6 +47,7 @@ int TCPConnection::sendToServer(const char* data) {
     }
 
     WSAResetEvent(SocketInfo->Overlapped.hEvent);
+    SocketInfo->TotalBytesSend += SocketInfo->BytesSEND;
     return 1;
 }
 
@@ -187,6 +184,7 @@ int UDPConnection::sendToServer(const char* data) {
         err = WSAGetLastError();
         return 0;
     }
+    SocketInfo->TotalBytesSend += SocketInfo->BytesSEND;
     return 1;
 }
 
@@ -230,7 +228,7 @@ DWORD WINAPI UDPConnection::WorkerThread(LPVOID lpParameter) {
     SI->TotalBytesRecv = 0;
     SI->EndEvent = CreateEvent(NULL, FALSE, FALSE, TEXT("EndEvent"));
 
-            client = (struct sockaddr_in*)malloc(sizeof(*client));
+    client = (struct sockaddr_in*)malloc(sizeof(*client));
     client_len = sizeof(*client);
 
     connection->setReceivedEvent(WSACreateEvent());

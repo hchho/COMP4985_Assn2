@@ -26,9 +26,9 @@ void CALLBACK TCPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
 
     Flags = 0;
 
-//    if (BytesTransferred == SI->DataBuf.len) {
-//        //        writeToFile(SI->DataBuf.buf); // Write buffer to file first
-//    }
+    writeToFile(SI->DataBuf.buf); // Write buffer to file first
+    memset(SI->Buffer, 0, DATA_BUFSIZE);
+    SI->DataBuf.buf = SI->Buffer;
 
     if (WSARecv(SI->Socket, &(SI->DataBuf), 1, &SI->BytesRECV, &Flags,
                 &(SI->Overlapped), TCPWorkerRoutine) == SOCKET_ERROR)
@@ -45,7 +45,6 @@ void CALLBACK TCPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
     SI->packetCount++;
     SI->TotalBytesRecv += BytesTransferred;
     GetSystemTime(&SI->stEndTime);
-
 }
 
 void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
