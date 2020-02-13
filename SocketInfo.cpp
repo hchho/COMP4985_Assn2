@@ -99,6 +99,9 @@ void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
 
             if (res == WAIT_FAILED) {
                 err = WSAGetLastError();
+                closesocket(SI->Socket);
+                WSAResetEvent(SI->Overlapped.hEvent);
+                SetEvent(SI->EndEvent);
                 return;
             }
         }
