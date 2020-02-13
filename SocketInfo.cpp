@@ -85,18 +85,6 @@ void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
         return;
     }
 
-//    if (BytesTransferred == 0)
-//    {
-//        perror("Closing socket");
-//    }
-
-//    if (Error != 0 || BytesTransferred == 0)
-//    {
-//        closesocket(SI->Socket);
-//        SetEvent(SI->EndEvent);
-//        return;
-//    }
-
     res = WSAGetOverlappedResult(SI->Socket, &SI->Overlapped, &SI->BytesRECV, FALSE, &SI->Flags);
 
     if (res == FALSE) {
