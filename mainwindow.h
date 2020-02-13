@@ -44,9 +44,29 @@ public:
     ~MainWindow();
     static DWORD WINAPI UIThread(void* param);
     static DWORD WINAPI SendThread(void* param);
+
+    /*------------------------------------------------------------------------------------------------------------------
+    -- FUNCTION: getConnection(void)
+    --
+    -- DATE: Feb 12, 2020
+    --
+    -- REVISIONS: N/A
+    --
+    -- DESIGNER: Henry Ho
+    --
+    -- PROGRAMMER: Henry Ho
+    --
+    -- INTERFACE: Connection* getConnection(void) const
+    --
+    -- RETURNS: Connection*
+    --
+    -- NOTES:
+    -- Use this function to get the current active connection
+    ------------------------------------------------------------------------------------------------------------------*/
     Connection* getConnection() const {
         return currConnection;
     }
+
     void setSentData(unsigned long bytesSent, unsigned int packets);
     void setReceivedData(unsigned long bytesReceived, unsigned int packets);
     void setTimeElapsedOutput(int);
