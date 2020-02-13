@@ -241,20 +241,15 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>30</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuConnect">
     <property name="title">
-     <string>Connect</string>
+     <string>Protocol</string>
     </property>
     <addaction name="actionTCP"/>
     <addaction name="actionUDP"/>
-   </widget>
-   <widget class="QMenu" name="menuDisconnect">
-    <property name="title">
-     <string>Disconnect</string>
-    </property>
    </widget>
    <widget class="QMenu" name="menuType">
     <property name="title">
@@ -264,7 +259,6 @@
     <addaction name="actionServer"/>
    </widget>
    <addaction name="menuConnect"/>
-   <addaction name="menuDisconnect"/>
    <addaction name="menuType"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>

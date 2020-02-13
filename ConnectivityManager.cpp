@@ -95,5 +95,5 @@ void ConnectivityManager::openConnection() {
 }
 
 void ConnectivityManager::closeConnection(Connection* connection) {
-    connection->stop();
+    connection->stopConnection();
 }

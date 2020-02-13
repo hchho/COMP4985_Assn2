@@ -1,6 +1,26 @@
 #include "SocketInfo.h"
 #include "Helpers.h"
 
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: convert
+--
+-- DATE: January 21, 2008
+--
+-- REVISIONS: N/A
+--
+-- DESIGNER: Henry Ho
+--
+-- PROGRAMMER: Henry Ho
+--
+-- INTERFACE: const char* convert (int args, char** input)
+--                  int args - the number of arguments
+--                  char ** input - the user input
+--
+-- RETURNS: const char*.
+--
+-- NOTES:
+-- Converts a user-provided host name to an IP address
+------------------------------------------------------------------------------------------------------------------*/
 void CALLBACK TCPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
                                LPWSAOVERLAPPED Overlapped, DWORD InFlags) {
     // Reference the WSAOVERLAPPED structure as a SOCKET_INFORMATION structure
