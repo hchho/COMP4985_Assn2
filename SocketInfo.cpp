@@ -70,7 +70,7 @@ void CALLBACK TCPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
 void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
                                LPWSAOVERLAPPED Overlapped, DWORD InFlags) {
     // Reference the WSAOVERLAPPED structure as a SOCKET_INFORMATION structure
-    int client_len;
+    int client_len, res, err;
     struct sockaddr_in *client;
     LPSOCKET_INFORMATION SI = (LPSOCKET_INFORMATION) Overlapped;
 
@@ -80,19 +80,48 @@ void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
     if (Error != 0)
     {
         perror("I/O operation failed with error");
-    }
-
-    if (BytesTransferred == 0)
-    {
-        perror("Closing socket");
-    }
-
-    if (Error != 0 || BytesTransferred == 0)
-    {
         closesocket(SI->Socket);
         SetEvent(SI->EndEvent);
         return;
     }
+
+//    if (BytesTransferred == 0)
+//    {
+//        perror("Closing socket");
+//    }
+
+//    if (Error != 0 || BytesTransferred == 0)
+//    {
+//        closesocket(SI->Socket);
+//        SetEvent(SI->EndEvent);
+//        return;
+//    }
+
+    res = WSAGetOverlappedResult(SI->Socket, &SI->Overlapped, &SI->BytesRECV, FALSE, &SI->Flags);
+
+    if (res == FALSE) {
+        err = WSAGetLastError();
+        if (err != WSA_IO_INCOMPLETE) {
+            closesocket(SI->Socket);
+            WSAResetEvent(SI->Overlapped.hEvent);
+            SetEvent(SI->EndEvent);
+            return;
+        } else {
+            res = WSAWaitForMultipleEvents(1, &SI->Overlapped.hEvent, TRUE, UDP_WAIT_TIME_MS, TRUE);
+
+            if (res == WAIT_FAILED) {
+                err = WSAGetLastError();
+                return;
+            }
+        }
+    }
+
+    if (SI->TotalBytesRecv == 0) {
+        GetSystemTime(&SI->stStartTime);
+    }
+    SI->packetCount++;
+    SI->TotalBytesRecv += SI->BytesRECV;
+    GetSystemTime(&SI->stEndTime);
 
     if (WSARecvFrom(SI->Socket, &(SI->DataBuf), 1, &SI->BytesRECV, &SI->Flags,
                     (struct sockaddr*)client, &client_len,
@@ -105,10 +134,4 @@ void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
             return;
         }
     }
-    if (SI->TotalBytesRecv == 0) {
-        GetSystemTime(&SI->stStartTime);
-    }
-    SI->packetCount++;
-    SI->TotalBytesRecv += SI->BytesRECV;
-    GetSystemTime(&SI->stEndTime);
 }

@@ -200,6 +200,6 @@ DWORD WINAPI MainWindow::UIThread(void* param) {
     WaitForSingleObject(socketInfo->EndEvent, INFINITE);
     window->setReceivedData(socketInfo->TotalBytesRecv, socketInfo->packetCount);
     window->setTimeElapsedOutput(delay(socketInfo->stStartTime, socketInfo->stEndTime));
-    window->on_receiveBtn_clicked();
+    WSAResetEvent(socketInfo->EndEvent);
     return 1;
 }

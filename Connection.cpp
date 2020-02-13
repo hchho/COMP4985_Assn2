@@ -250,7 +250,7 @@ DWORD WINAPI UDPConnection::WorkerThread(LPVOID lpParameter) {
     {
         while(TRUE)
         {
-            Index = WSAWaitForMultipleEvents(1, EventArray, FALSE, 10000, TRUE);
+            Index = WSAWaitForMultipleEvents(1, EventArray, FALSE, UDP_WAIT_TIME_MS, TRUE);
 
             if (Index == WSA_WAIT_FAILED)
             {
