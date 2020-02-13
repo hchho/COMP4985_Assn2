@@ -150,10 +150,6 @@ int MainWindow::getNumberOfTimesToSend() {
     return numberOfTimesToSend;
 }
 
-bool MainWindow::getIsSavedInputBoxChecked() {
-    return ui->saveInputBox->isChecked();
-}
-
 void MainWindow::setSentData(unsigned long bytesSent, unsigned int packets) {
     mtx.lock();
     ui->bytesSentOutput->setText(QString::number(bytesSent));
