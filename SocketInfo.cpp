@@ -69,7 +69,6 @@ void CALLBACK TCPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
 
 void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
                                LPWSAOVERLAPPED Overlapped, DWORD InFlags) {
-    // Reference the WSAOVERLAPPED structure as a SOCKET_INFORMATION structure
     int client_len, res, err;
     struct sockaddr_in *client;
     LPSOCKET_INFORMATION SI = (LPSOCKET_INFORMATION) Overlapped;
@@ -85,6 +84,7 @@ void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
         return;
     }
 
+    // This must be called in the scenario the program has not read the data in time
     res = WSAGetOverlappedResult(SI->Socket, &SI->Overlapped, &SI->BytesRECV, FALSE, &SI->Flags);
 
     if (res == FALSE) {
@@ -95,6 +95,7 @@ void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
             SetEvent(SI->EndEvent);
             return;
         } else {
+            // Wait for the read operation to complete
             res = WSAWaitForMultipleEvents(1, &SI->Overlapped.hEvent, TRUE, UDP_WAIT_TIME_MS, TRUE);
 
             if (res == WAIT_FAILED) {
