@@ -46,7 +46,7 @@ void CALLBACK TCPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
 
     Flags = 0;
 
-    writeToFile(SI->DataBuf.buf); // Write buffer to file first
+    if (SI->saveInputToFile) writeToFile(SI->DataBuf.buf); // Write buffer to file
     memset(SI->Buffer, 0, DATA_BUFSIZE); // This is done to ensure the buffer is clear before it reads
     SI->DataBuf.buf = SI->Buffer;
 
@@ -107,7 +107,7 @@ void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
             }
         }
     }
-
+    if (SI->saveInputToFile) writeToFile(SI->DataBuf.buf); // Write buffer to file
     if (SI->TotalBytesRecv == 0) {
         GetSystemTime(&SI->stStartTime);
     }

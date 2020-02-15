@@ -89,6 +89,8 @@ private slots:
 
     void on_receiveBtn_clicked();
 
+    void on_saveInputCheckbox_clicked();
+
 private:
     Ui::MainWindow *ui;
     ConnectionType connectionType;

@@ -38,6 +38,7 @@ typedef struct _SOCKET_INFORMATION {
     DWORD Flags;
     SYSTEMTIME stStartTime, stEndTime;
     HANDLE EndEvent;
+    BOOL saveInputToFile;
     unsigned int packetCount = 0;
     unsigned long TotalBytesRecv = 0;
     unsigned long TotalBytesSend = 0;

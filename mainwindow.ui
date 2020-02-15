@@ -68,6 +68,13 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QCheckBox" name="saveInputCheckbox">
+         <property name="text">
+          <string>Save input (NOTE: This will affect performance)</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </item>
      <item>

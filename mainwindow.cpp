@@ -203,3 +203,9 @@ DWORD WINAPI MainWindow::UIThread(void* param) {
     WSAResetEvent(socketInfo->EndEvent);
     return 1;
 }
+
+void MainWindow::on_saveInputCheckbox_clicked()
+{
+    LPSOCKET_INFORMATION SI = currConnection->getSocketInfo();
+    SI->saveInputToFile = ui->saveInputCheckbox->isChecked();
+}
