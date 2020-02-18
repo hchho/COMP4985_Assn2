@@ -18,9 +18,23 @@ QT_END_NAMESPACE
 -- PROGRAM: Knekt
 --
 -- FUNCTIONS:
+-- void setSentData(unsigned long bytesSent, unsigned int packets)
+-- void setReceivedData(unsigned long bytesReceived, unsigned int packets)
+-- void setTimeElapsedOutput(int)
+-- int getPacketSize(void)
+-- int getNumberOfTimesToSend(void)
+-- void on_actionTCP_triggered(void)
+-- void on_actionUDP_triggered(void)
+-- void on_actionClient_triggered(void)
+-- void on_actionServer_triggered(void)
+-- void on_connectBtn_clicked(void)
+-- void on_sendPacketBtn_clicked(void)
+-- void on_sendFileBtn_clicked(void)
+-- void on_receiveBtn_clicked(void)
+-- void on_saveInputCheckbox_clicked(void)
 -- static DWORD WINAPI UIThread(void* param)
 -- static DWORD WINAPI SendThread(void* param)
--- Connection* getConnection() const
+-- Connection* getConnection(void) const
 --
 -- DATE: Feb 12, 2020
 --

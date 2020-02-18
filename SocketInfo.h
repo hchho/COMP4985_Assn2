@@ -2,7 +2,7 @@
 #define SOCKETINFO_H
 
 #define DATA_BUFSIZE        100000
-#define UDP_WAIT_TIME_MS    5000
+#define UDP_WAIT_TIME_MS    10000
 
 #include <WinSock2.h>
 

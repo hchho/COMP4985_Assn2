@@ -3,6 +3,49 @@
 #include "Helpers.h"
 #include <streambuf>
 
+/*------------------------------------------------------------------------------------------------------------------
+-- SOURCE FILE: Connection.cpp - This file contains the implementation of Connection class and its children.
+--
+-- PROGRAM: Knekt
+--
+-- FUNCTIONS:
+-- void initClientConnection(void)
+-- int sendToServer(const char*)
+-- int sendFileToServer(const char*)
+-- void startRoutine(unsigned long)
+-- DWORD WINAPI WorkerThread(LPVOID lpParameter)
+--
+-- DATE: Feb 12, 2020
+--
+-- REVISIONS: N/A
+--
+-- DESIGNER: Henry Ho
+--
+-- PROGRAMMER: Henry Ho
+--
+-- NOTES:
+-- (N/A)
+------------------------------------------------------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: sendFileToServer
+--
+-- DATE: Feb 17, 2020
+--
+-- REVISIONS: N/A
+--
+-- DESIGNER: Henry Ho
+--
+-- PROGRAMMER: Henry Ho
+--
+-- INTERFACE: int sendFileToServer(const char* filePath)
+--              const char* filePath - the file path of the file to send
+--
+-- RETURNS: int
+--
+-- NOTES:
+-- This function takes the entire size of the file and calls sendToServer to send it over the network.
+------------------------------------------------------------------------------------------------------------------*/
 int Connection::sendFileToServer(const char *filePath) {
     std::string buffer;
 
@@ -21,6 +64,25 @@ int Connection::sendFileToServer(const char *filePath) {
     return TRUE;
 }
 
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: sendToServer
+--
+-- DATE: Feb 17, 2020
+--
+-- REVISIONS: N/A
+--
+-- DESIGNER: Henry Ho
+--
+-- PROGRAMMER: Henry Ho
+--
+-- INTERFACE: int sendToServer(const char* data)
+--              const char* data - the data to send
+--
+-- RETURNS: int
+--
+-- NOTES:
+-- (N/A)
+------------------------------------------------------------------------------------------------------------------*/
 int TCPConnection::sendToServer(const char* data) {
     int res, err;
     SocketInfo->DataBuf.buf = const_cast<char *>(data);
@@ -52,6 +114,25 @@ int TCPConnection::sendToServer(const char* data) {
     return 1;
 }
 
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: startRoutine
+--
+-- DATE: Feb 17, 2020
+--
+-- REVISIONS: N/A
+--
+-- DESIGNER: Henry Ho
+--
+-- PROGRAMMER: Henry Ho
+--
+-- INTERFACE: voiud startRoutine(unsigned long packetSize)
+--              unsigned long packetSize - the buffer size to set
+--
+-- RETURNS: int
+--
+-- NOTES:
+-- Call this function to begin the thread to accept data.
+------------------------------------------------------------------------------------------------------------------*/
 void TCPConnection::startRoutine(unsigned long packetSize) {
     listen(sd, 1);
 
@@ -71,6 +152,25 @@ void TCPConnection::startRoutine(unsigned long packetSize) {
     return;
 }
 
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: WorkerThread
+--
+-- DATE: Feb 17, 2020
+--
+-- REVISIONS: N/A
+--
+-- DESIGNER: Henry Ho
+--
+-- PROGRAMMER: Henry Ho
+--
+-- INTERFACE: DWORD WINAPI WorkerThread(LPVOID lpParameter)
+--              LPVOID lpParameter - a pointer to a Connection object
+--1
+-- RETURNS: DWORD
+--
+-- NOTES:
+-- Pass this function to a thread to receive incoming socket data.
+------------------------------------------------------------------------------------------------------------------*/
 DWORD WINAPI TCPConnection::WorkerThread(LPVOID lpParameter) {
     DWORD Flags;
     WSAEVENT EventArray[1];
@@ -143,6 +243,24 @@ DWORD WINAPI TCPConnection::WorkerThread(LPVOID lpParameter) {
     return 0;
 }
 
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: initClientConnection
+--
+-- DATE: Feb 17, 2020
+--
+-- REVISIONS: N/A
+--
+-- DESIGNER: Henry Ho
+--
+-- PROGRAMMER: Henry Ho
+--
+-- INTERFACE: void initClientConnection(void)
+--
+-- RETURNS: void
+--
+-- NOTES:
+-- Call this function to initialize a TCP client connection.
+------------------------------------------------------------------------------------------------------------------*/
 void TCPConnection::initClientConnection() {
     if (connect (sd, (struct sockaddr *)server, server_len) == -1)
     {
@@ -159,6 +277,25 @@ void TCPConnection::initClientConnection() {
     }
 }
 
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: sendToServer
+--
+-- DATE: Feb 17, 2020
+--
+-- REVISIONS: N/A
+--
+-- DESIGNER: Henry Ho
+--
+-- PROGRAMMER: Henry Ho
+--
+-- INTERFACE: int sendToServer(const char* data)
+--              const char* data - the data to send
+--
+-- RETURNS: int
+--
+-- NOTES:
+-- (N/A)
+------------------------------------------------------------------------------------------------------------------*/
 int UDPConnection::sendToServer(const char* data) {
     int res, err;
     SocketInfo->DataBuf.buf = const_cast<char *>(data);
@@ -189,7 +326,25 @@ int UDPConnection::sendToServer(const char* data) {
     return 1;
 }
 
-
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: startRoutine
+--
+-- DATE: Feb 17, 2020
+--
+-- REVISIONS: N/A
+--
+-- DESIGNER: Henry Ho
+--
+-- PROGRAMMER: Henry Ho
+--
+-- INTERFACE: voiud startRoutine(unsigned long packetSize)
+--              unsigned long packetSize - the buffer size to set
+--
+-- RETURNS: int
+--
+-- NOTES:
+-- Call this function to begin the thread to accept data.
+------------------------------------------------------------------------------------------------------------------*/
 void UDPConnection::startRoutine(unsigned long packetSize) {
 
     // packetSize must be large enough to hold all the data coming in.
@@ -202,6 +357,24 @@ void UDPConnection::startRoutine(unsigned long packetSize) {
     return;
 }
 
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: initClientConnection
+--
+-- DATE: Feb 17, 2020
+--
+-- REVISIONS: N/A
+--
+-- DESIGNER: Henry Ho
+--
+-- PROGRAMMER: Henry Ho
+--
+-- INTERFACE: void initClientConnection(void)
+--
+-- RETURNS: void
+--
+-- NOTES:
+-- Call this function to initialize a TCP client connection.
+------------------------------------------------------------------------------------------------------------------*/
 void UDPConnection::initClientConnection() {
     SecureZeroMemory((PVOID) &SocketInfo->Overlapped, sizeof(WSAOVERLAPPED));
     SocketInfo->Overlapped.hEvent = WSACreateEvent();
@@ -218,6 +391,25 @@ void UDPConnection::initClientConnection() {
     }
 }
 
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: WorkerThread
+--
+-- DATE: Feb 17, 2020
+--
+-- REVISIONS: N/A
+--
+-- DESIGNER: Henry Ho
+--
+-- PROGRAMMER: Henry Ho
+--
+-- INTERFACE: DWORD WINAPI WorkerThread(LPVOID lpParameter)
+--              LPVOID lpParameter - a pointer to a Connection object
+--1
+-- RETURNS: DWORD
+--
+-- NOTES:
+-- Pass this function to a thread to receive incoming socket data.
+------------------------------------------------------------------------------------------------------------------*/
 DWORD WINAPI UDPConnection::WorkerThread(LPVOID lpParameter) {
     int client_len;
     struct sockaddr_in *client;
@@ -227,10 +419,23 @@ DWORD WINAPI UDPConnection::WorkerThread(LPVOID lpParameter) {
     UDPConnection *connection = (UDPConnection*) lpParameter;
     LPSOCKET_INFORMATION SI = connection->SocketInfo;
     SI->TotalBytesRecv = 0;
+    SecureZeroMemory((PVOID) &SI->Overlapped, sizeof(WSAOVERLAPPED));
+    SI->Overlapped.hEvent = WSACreateEvent();
+
+    if (SI->Overlapped.hEvent == WSA_INVALID_EVENT) {
+        ErrorHandler::showMessage("Error setting event");
+        exit(1);
+    }
+
     SI->EndEvent = CreateEvent(NULL, FALSE, FALSE, TEXT("EndEvent"));
 
-    client = (struct sockaddr_in*)malloc(sizeof(*client));
-    client_len = sizeof(*client);
+    if (SI->EndEvent == WSA_INVALID_EVENT) {
+        perror("Error creating end event socket");
+        return 0;
+    }
+
+    client = (struct sockaddr_in*)malloc(sizeof(struct sockaddr_in));
+    client_len = sizeof(struct sockaddr_in);
 
     connection->setReceivedEvent(WSACreateEvent());
 
@@ -276,7 +481,6 @@ DWORD WINAPI UDPConnection::WorkerThread(LPVOID lpParameter) {
         // Fill in the details of our accepted socket.
 
         SI->Socket = connection->getListenSocket();
-        ZeroMemory(&(SI->Overlapped), sizeof(WSAOVERLAPPED));
         memset(SI->Buffer, 0, DATA_BUFSIZE);
         SI->BytesSEND = 0;
         SI->BytesRECV = 0;
