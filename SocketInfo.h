@@ -15,6 +15,7 @@
 -- FUNCTIONS:
 -- void CALLBACK TCPWorkerRoutine(DWORD Error, DWORD BytesTransferred, LPWSAOVERLAPPED Overlapped, DWORD InFlags)
 -- void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred, LPWSAOVERLAPPED Overlapped, DWORD InFlags)
+-- void terminateCallbackRoutine(LPSOCKET_INFORMATION)
 --
 -- DATE: Feb 12, 2020
 --
@@ -49,5 +50,7 @@ void CALLBACK TCPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
 
 void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
                                LPWSAOVERLAPPED Overlapped, DWORD InFlags);
+
+void terminateCallbackRoutine(LPSOCKET_INFORMATION);
 
 #endif // SOCKETINFO_H

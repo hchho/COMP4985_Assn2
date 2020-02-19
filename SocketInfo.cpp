@@ -11,6 +11,7 @@
 --                                LPWSAOVERLAPPED Overlapped, DWORD InFlags)
 -- void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
 --                                LPWSAOVERLAPPED Overlapped, DWORD InFlags)
+-- void terminateCallbackRoutine(LPSOCKET_INFORMATION)
 --
 -- DATE: Feb 17, 2020
 --
@@ -27,7 +28,7 @@
 /*------------------------------------------------------------------------------------------------------------------
 -- FUNCTION: TCPWorkerRoutine
 --
--- DATE: January 21, 2008
+-- DATE: January 21, 2020
 --
 -- REVISIONS: N/A
 --
@@ -98,7 +99,7 @@ void CALLBACK TCPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
 /*------------------------------------------------------------------------------------------------------------------
 -- FUNCTION: UDPWorkerRoutine
 --
--- DATE: January 21, 2008
+-- DATE: January 21, 2020
 --
 -- REVISIONS: N/A
 --
@@ -130,9 +131,7 @@ void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
     if (Error != 0)
     {
         perror("I/O operation failed with error");
-        closesocket(SI->Socket);
-        CloseHandle(SI->Overlapped.hEvent);
-        SetEvent(SI->EndEvent);
+        terminateCallbackRoutine(SI);
         return;
     }
 
@@ -143,9 +142,7 @@ void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
     if (res == FALSE) {
         err = WSAGetLastError();
         if (err != WSA_IO_INCOMPLETE) {
-            closesocket(SI->Socket);
-            CloseHandle(SI->Overlapped.hEvent);
-            SetEvent(SI->EndEvent);
+            terminateCallbackRoutine(SI);
             return;
         } else {
             // Wait for the read operation to complete
@@ -153,9 +150,7 @@ void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
             WSAResetEvent(SI->Overlapped.hEvent);
             if (res == WAIT_FAILED) {
                 err = WSAGetLastError();
-                closesocket(SI->Socket);
-                CloseHandle(SI->Overlapped.hEvent);
-                SetEvent(SI->EndEvent);
+                terminateCallbackRoutine(SI);
                 return;
             }
         }
@@ -181,4 +176,29 @@ void CALLBACK UDPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
             return;
         }
     }
+}
+
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: terminateCallbackRoutine
+--
+-- DATE: January 21, 2020
+--
+-- REVISIONS: N/A
+--
+-- DESIGNER: Henry Ho
+--
+-- PROGRAMMER: Henry Ho
+--
+-- INTERFACE: void terminateCallbackRoutine(LPSOCKET_INFORMATION SI)
+--              LPSOCKET_INFORMATION SI - pointer to the socket information struct
+--
+-- RETURNS: void
+--
+-- NOTES:
+-- Call this function to clean events and the socket before returning out of the callback function.
+------------------------------------------------------------------------------------------------------------------*/
+void terminateCallbackRoutine(LPSOCKET_INFORMATION SI) {
+    closesocket(SI->Socket);
+    CloseHandle(SI->Overlapped.hEvent);
+    SetEvent(SI->EndEvent);
 }

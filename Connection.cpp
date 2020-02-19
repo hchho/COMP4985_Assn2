@@ -478,8 +478,6 @@ DWORD WINAPI UDPConnection::WorkerThread(LPVOID lpParameter) {
 
         WSAResetEvent(EventArray[Index - WSA_WAIT_EVENT_0]);
 
-        // Fill in the details of our accepted socket.
-
         SI->Socket = connection->getListenSocket();
         memset(SI->Buffer, 0, DATA_BUFSIZE);
         SI->BytesSEND = 0;
